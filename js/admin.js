@@ -1,4 +1,4 @@
-// Admin Panel JavaScript - Version with Fixed File Upload
+// Admin Panel JavaScript - Fully Working Version with File Upload
 
 // Global variables
 let currentPdfFile = null;
@@ -6,6 +6,7 @@ let currentCoverFile = null;
 
 // Check admin authentication
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Admin panel loaded');
     if (SulafAPI.isAdminLoggedIn()) {
         showAdminDashboard();
         loadAdminData();
@@ -29,7 +30,11 @@ function showAdminDashboard() {
     const dashboard = document.getElementById('adminDashboard');
     if (loginForm) loginForm.style.display = 'none';
     if (dashboard) dashboard.style.display = 'block';
-    setupFileUpload(); // Setup file upload when dashboard shows
+    
+    // Setup file upload after dashboard shows
+    setTimeout(() => {
+        setupFileUpload();
+    }, 100);
 }
 
 function loadAdminData() {
@@ -45,18 +50,17 @@ function loadAdminData() {
 
 function loadDashboardStats() {
     const stats = SulafAPI.getSiteStats();
-    const elements = {
-        statTotalBooks: stats.totalBooks,
-        statTotalUsers: stats.totalUsers,
-        statTotalDownloads: stats.totalDownloads,
-        statTotalViews: stats.totalViews
-    };
-    for (const [id, value] of Object.entries(elements)) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = value;
-    }
-    const badge = document.getElementById('adminStatsBadge');
-    if (badge) badge.textContent = stats.totalBooks;
+    const statTotalBooks = document.getElementById('statTotalBooks');
+    const statTotalUsers = document.getElementById('statTotalUsers');
+    const statTotalDownloads = document.getElementById('statTotalDownloads');
+    const statTotalViews = document.getElementById('statTotalViews');
+    const adminStatsBadge = document.getElementById('adminStatsBadge');
+    
+    if (statTotalBooks) statTotalBooks.textContent = stats.totalBooks;
+    if (statTotalUsers) statTotalUsers.textContent = stats.totalUsers;
+    if (statTotalDownloads) statTotalDownloads.textContent = stats.totalDownloads;
+    if (statTotalViews) statTotalViews.textContent = stats.totalViews;
+    if (adminStatsBadge) adminStatsBadge.textContent = stats.totalBooks;
 }
 
 function loadBooksList(searchTerm = '') {
@@ -69,7 +73,7 @@ function loadBooksList(searchTerm = '') {
     if (!tbody) return;
     
     if (books.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">لا توجد كتب</td></tr>';
+        tbody.innerHTML = '发展<td colspan="6" style="text-align:center">لا توجد كتب</td>发展';
         return;
     }
     
@@ -102,7 +106,7 @@ function loadUsersList(searchTerm = '') {
     
     tbody.innerHTML = users.map(user => `
         <tr>
-            <td><img src="${user.avatar}" class="user-avatar-thumb"></td>
+            <td><img src="${user.avatar}" class="user-avatar-thumb" onerror="this.src='https://via.placeholder.com/40'"></td>
             <td>${user.username}</td>
             <td>${user.email}</td>
             <td><span class="role-badge ${user.role}">${user.role === 'admin' ? 'مشرف' : 'مستخدم'}</span></td>
@@ -239,111 +243,113 @@ function setupFileUpload() {
     // PDF File Input
     const pdfInput = document.getElementById('bookPdfFile');
     if (pdfInput) {
-        // Remove old listeners to avoid duplicates
-        const newPdfInput = pdfInput.cloneNode(true);
-        pdfInput.parentNode.replaceChild(newPdfInput, pdfInput);
-        
-        newPdfInput.addEventListener('change', function(e) {
-            console.log('PDF file selected:', e.target.files);
-            if (e.target.files && e.target.files[0]) {
-                handlePdfFile(e.target.files[0]);
-            }
-        });
-        
-        // Update reference
-        window.pdfInputRef = newPdfInput;
+        // Remove old listener and add new one
+        pdfInput.removeEventListener('change', handlePdfFileChange);
+        pdfInput.addEventListener('change', handlePdfFileChange);
+        console.log('PDF input listener attached');
+    } else {
+        console.log('PDF input not found');
     }
     
     // Cover File Input
     const coverInput = document.getElementById('bookCoverFile');
     if (coverInput) {
-        const newCoverInput = coverInput.cloneNode(true);
-        coverInput.parentNode.replaceChild(newCoverInput, coverInput);
-        
-        newCoverInput.addEventListener('change', function(e) {
-            console.log('Cover file selected:', e.target.files);
-            if (e.target.files && e.target.files[0]) {
-                handleCoverFile(e.target.files[0]);
-            }
-        });
-        
-        window.coverInputRef = newCoverInput;
+        coverInput.removeEventListener('change', handleCoverFileChange);
+        coverInput.addEventListener('change', handleCoverFileChange);
+        console.log('Cover input listener attached');
     }
     
     // Setup upload area clicks
     const pdfUploadArea = document.getElementById('pdfUploadArea');
     if (pdfUploadArea) {
-        // Remove old click listener
-        const newPdfArea = pdfUploadArea.cloneNode(true);
-        pdfUploadArea.parentNode.replaceChild(newPdfArea, pdfUploadArea);
-        
-        newPdfArea.addEventListener('click', function(e) {
-            if (e.target.closest('.upload-btn')) {
-                const input = document.getElementById('bookPdfFile');
-                if (input) input.click();
-            } else if (!e.target.closest('.remove-file')) {
-                const input = document.getElementById('bookPdfFile');
-                if (input) input.click();
-            }
-        });
+        pdfUploadArea.removeEventListener('click', handlePdfAreaClick);
+        pdfUploadArea.addEventListener('click', handlePdfAreaClick);
         
         // Drag and drop
-        newPdfArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            newPdfArea.classList.add('dragover');
-        });
-        
-        newPdfArea.addEventListener('dragleave', () => {
-            newPdfArea.classList.remove('dragover');
-        });
-        
-        newPdfArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            newPdfArea.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length && files[0].type === 'application/pdf') {
-                handlePdfFile(files[0]);
-            } else {
-                showToast('الرجاء إسقاط ملف PDF صالح', 'error');
-            }
-        });
+        pdfUploadArea.removeEventListener('dragover', handleDragOver);
+        pdfUploadArea.removeEventListener('dragleave', handleDragLeave);
+        pdfUploadArea.removeEventListener('drop', handlePdfDrop);
+        pdfUploadArea.addEventListener('dragover', handleDragOver);
+        pdfUploadArea.addEventListener('dragleave', handleDragLeave);
+        pdfUploadArea.addEventListener('drop', handlePdfDrop);
     }
     
     // Cover upload area
     const coverUploadArea = document.getElementById('coverUploadArea');
     if (coverUploadArea) {
-        const newCoverArea = coverUploadArea.cloneNode(true);
-        coverUploadArea.parentNode.replaceChild(newCoverArea, coverUploadArea);
+        coverUploadArea.removeEventListener('click', handleCoverAreaClick);
+        coverUploadArea.addEventListener('click', handleCoverAreaClick);
         
-        newCoverArea.addEventListener('click', function(e) {
-            if (e.target.closest('.upload-btn')) {
-                const input = document.getElementById('bookCoverFile');
-                if (input) input.click();
-            } else if (!e.target.closest('.remove-file')) {
-                const input = document.getElementById('bookCoverFile');
-                if (input) input.click();
-            }
-        });
-        
-        newCoverArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            newCoverArea.classList.add('dragover');
-        });
-        
-        newCoverArea.addEventListener('dragleave', () => {
-            newCoverArea.classList.remove('dragover');
-        });
-        
-        newCoverArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            newCoverArea.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length && files[0].type.startsWith('image/')) {
-                handleCoverFile(files[0]);
-            } else {
-                showToast('الرجاء إسقاط صورة صالحة', 'error');
-            }
-        });
+        coverUploadArea.removeEventListener('dragover', handleDragOver);
+        coverUploadArea.removeEventListener('dragleave', handleDragLeave);
+        coverUploadArea.removeEventListener('drop', handleCoverDrop);
+        coverUploadArea.addEventListener('dragover', handleDragOver);
+        coverUploadArea.addEventListener('dragleave', handleDragLeave);
+        coverUploadArea.addEventListener('drop', handleCoverDrop);
+    }
+}
+
+// Event Handlers
+function handlePdfFileChange(e) {
+    console.log('PDF file selected:', e.target.files);
+    if (e.target.files && e.target.files[0]) {
+        handlePdfFile(e.target.files[0]);
+    }
+}
+
+function handleCoverFileChange(e) {
+    console.log('Cover file selected:', e.target.files);
+    if (e.target.files && e.target.files[0]) {
+        handleCoverFile(e.target.files[0]);
+    }
+}
+
+function handlePdfAreaClick(e) {
+    e.stopPropagation();
+    const input = document.getElementById('bookPdfFile');
+    if (input) {
+        console.log('Clicking PDF input');
+        input.click();
+    }
+}
+
+function handleCoverAreaClick(e) {
+    e.stopPropagation();
+    const input = document.getElementById('bookCoverFile');
+    if (input) {
+        console.log('Clicking cover input');
+        input.click();
+    }
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.currentTarget.classList.add('dragover');
+}
+
+function handleDragLeave(e) {
+    e.currentTarget.classList.remove('dragover');
+}
+
+function handlePdfDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length && files[0].type === 'application/pdf') {
+        handlePdfFile(files[0]);
+    } else {
+        showToast('الرجاء إسقاط ملف PDF صالح', 'error');
+    }
+}
+
+function handleCoverDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length && files[0].type.startsWith('image/')) {
+        handleCoverFile(files[0]);
+    } else {
+        showToast('الرجاء إسقاط صورة صالحة', 'error');
     }
 }
 
@@ -362,10 +368,6 @@ function handlePdfFile(file) {
     
     currentPdfFile = file;
     
-    // Create object URL for preview
-    const url = URL.createObjectURL(file);
-    window.currentPdfUrl = url;
-    
     // Hide upload area, show preview
     const uploadArea = document.getElementById('pdfUploadArea');
     const preview = document.getElementById('pdfPreview');
@@ -373,13 +375,16 @@ function handlePdfFile(file) {
     const fileInfo = document.getElementById('pdfFileInfo');
     
     if (uploadArea) uploadArea.style.display = 'none';
-    if (preview) preview.style.display = 'flex';
+    if (preview) {
+        preview.style.display = 'flex';
+        preview.style.alignItems = 'center';
+        preview.style.justifyContent = 'space-between';
+    }
     if (fileNameSpan) fileNameSpan.textContent = file.name;
     
     const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
     if (fileInfo) {
-        fileInfo.innerHTML = `<i class="fas fa-check-circle"></i> تم الرفع (${sizeMB} MB)`;
-        fileInfo.style.color = '#2E7D32';
+        fileInfo.innerHTML = `<i class="fas fa-check-circle" style="color:#2E7D32"></i> تم الرفع (${sizeMB} MB)`;
     }
     
     showToast(`تم رفع ملف PDF: ${file.name}`, 'success');
@@ -403,7 +408,6 @@ function handleCoverFile(file) {
     
     // Create object URL for preview
     const url = URL.createObjectURL(file);
-    window.currentCoverUrl = url;
     
     // Hide upload area, show preview
     const uploadArea = document.getElementById('coverUploadArea');
@@ -421,7 +425,6 @@ function handleCoverFile(file) {
 function removePdfFile() {
     console.log('Removing PDF file');
     currentPdfFile = null;
-    window.currentPdfUrl = null;
     
     const uploadArea = document.getElementById('pdfUploadArea');
     const preview = document.getElementById('pdfPreview');
@@ -439,15 +442,16 @@ function removePdfFile() {
 function removeCoverFile() {
     console.log('Removing cover file');
     currentCoverFile = null;
-    window.currentCoverUrl = null;
     
     const uploadArea = document.getElementById('coverUploadArea');
     const preview = document.getElementById('coverPreview');
     const fileInput = document.getElementById('bookCoverFile');
+    const previewImg = document.getElementById('coverPreviewImg');
     
     if (uploadArea) uploadArea.style.display = 'flex';
     if (preview) preview.style.display = 'none';
     if (fileInput) fileInput.value = '';
+    if (previewImg) previewImg.src = '';
     
     showToast('تم إلغاء اختيار صورة الغلاف', 'info');
 }
@@ -470,6 +474,8 @@ async function addBookWithFiles() {
     const description = document.getElementById('bookDesc')?.value;
     const tagsInput = document.getElementById('bookTags');
     const tags = tagsInput ? tagsInput.value.split(',').map(t => t.trim()) : [];
+    
+    console.log('Adding book:', { title, author, category, hasPdf: !!currentPdfFile });
     
     if (!title || !author) {
         showToast('الرجاء إدخال عنوان الكتاب واسم المؤلف', 'error');
@@ -496,10 +502,10 @@ async function addBookWithFiles() {
         
         const newBook = {
             id: Date.now().toString(),
-            title,
-            author,
-            category,
-            description,
+            title: title,
+            author: author,
+            category: category,
+            description: description || '',
             coverImage: coverImage,
             pdfData: pdfBase64,
             pdfUrl: pdfBase64,
@@ -518,10 +524,11 @@ async function addBookWithFiles() {
         books.push(newBook);
         localStorage.setItem(STORAGE_KEYS.books, JSON.stringify(books));
         
+        console.log('Book saved successfully:', newBook.id);
         return true;
     } catch (error) {
         console.error('Error uploading files:', error);
-        showToast('حدث خطأ أثناء رفع الملفات', 'error');
+        showToast('حدث خطأ أثناء رفع الملفات: ' + error.message, 'error');
         return false;
     }
 }
@@ -565,7 +572,10 @@ function setupAdminEventListeners() {
             
             if (tab === 'users') loadUsersList();
             if (tab === 'reviews') loadReviewsList();
-            if (tab === 'add') setupFileUpload();
+            if (tab === 'add') {
+                // Reset file upload when switching to add tab
+                setTimeout(() => setupFileUpload(), 100);
+            }
         });
     });
     
@@ -866,6 +876,10 @@ window.deleteReview = function(bookId, userId) {
     }
 };
 
+// Make functions available globally
+window.removePdfFile = removePdfFile;
+window.removeCoverFile = removeCoverFile;
+
 // Close modals
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('close-edit') || e.target.classList.contains('modal')) {
@@ -874,6 +888,4 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Make functions available globally
-window.removePdfFile = removePdfFile;
-window.removeCoverFile = removeCoverFile;
+console.log('Admin.js loaded successfully');
