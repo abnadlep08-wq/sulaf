@@ -1,154 +1,122 @@
-// Admin Panel JavaScript - Complete Version
+// Admin Panel JavaScript - Version with Fixed File Upload
 
 // Global variables
-let currentAdminUser = null;
-let notificationHistory = [];
-
-// Initialize admin panel
-document.addEventListener('DOMContentLoaded', () => {
-    checkAdminAuth();
-    setupAdminEventListeners();
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
-});
+let currentPdfFile = null;
+let currentCoverFile = null;
 
 // Check admin authentication
-function checkAdminAuth() {
+document.addEventListener('DOMContentLoaded', () => {
     if (SulafAPI.isAdminLoggedIn()) {
         showAdminDashboard();
         loadAdminData();
     } else {
         showAdminLogin();
     }
-}
+    setupAdminEventListeners();
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+});
 
 function showAdminLogin() {
-    document.getElementById('loginForm').style.display = 'flex';
-    document.getElementById('adminDashboard').style.display = 'none';
+    const loginForm = document.getElementById('loginForm');
+    const dashboard = document.getElementById('adminDashboard');
+    if (loginForm) loginForm.style.display = 'flex';
+    if (dashboard) dashboard.style.display = 'none';
 }
 
 function showAdminDashboard() {
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('adminDashboard').style.display = 'block';
-    currentAdminUser = SulafAPI.getCurrentUser();
+    const loginForm = document.getElementById('loginForm');
+    const dashboard = document.getElementById('adminDashboard');
+    if (loginForm) loginForm.style.display = 'none';
+    if (dashboard) dashboard.style.display = 'block';
+    setupFileUpload(); // Setup file upload when dashboard shows
 }
 
-// Load all admin data
 function loadAdminData() {
     loadDashboardStats();
     loadBooksList();
     loadUsersList();
     loadReviewsList();
     loadTopBooks();
-    loadRecentActivity();
     loadTopAuthors();
-    loadUserActivityStats();
-    loadTopRatedBooks();
-    loadNotificationHistory();
     loadUsersForNotification();
+    loadBooksByCategoryChart();
 }
 
-// Load dashboard statistics
 function loadDashboardStats() {
     const stats = SulafAPI.getSiteStats();
-    document.getElementById('statTotalBooks').textContent = stats.totalBooks;
-    document.getElementById('statTotalUsers').textContent = stats.totalUsers;
-    document.getElementById('statTotalDownloads').textContent = stats.totalDownloads;
-    document.getElementById('statTotalViews').textContent = stats.totalViews;
-    document.getElementById('statTotalReviews').textContent = stats.totalReviews;
-    
-    // Calculate average rating
-    const books = SulafAPI.getAllBooks();
-    const avgRating = books.reduce((sum, book) => sum + (book.rating || 0), 0) / books.length;
-    document.getElementById('statAvgRating').textContent = avgRating.toFixed(1);
-    document.getElementById('adminStatsBadge').textContent = stats.totalBooks;
+    const elements = {
+        statTotalBooks: stats.totalBooks,
+        statTotalUsers: stats.totalUsers,
+        statTotalDownloads: stats.totalDownloads,
+        statTotalViews: stats.totalViews
+    };
+    for (const [id, value] of Object.entries(elements)) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    }
+    const badge = document.getElementById('adminStatsBadge');
+    if (badge) badge.textContent = stats.totalBooks;
 }
 
-// Load books list
 function loadBooksList(searchTerm = '') {
     let books = SulafAPI.getAllBooks();
-    
     if (searchTerm) {
-        books = books.filter(book => 
-            book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            book.author.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        books = books.filter(b => b.title.includes(searchTerm) || b.author.includes(searchTerm));
     }
     
     const tbody = document.getElementById('adminBooksList');
     if (!tbody) return;
     
     if (books.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">لا توجد كتب</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">لا توجد كتب</td></tr>';
         return;
     }
     
     tbody.innerHTML = books.map(book => `
         <tr>
-            <td><img src="${book.coverImage}" alt="${book.title}" class="book-cover-thumb" onerror="this.src='https://via.placeholder.com/50x70/cccccc/666666?text=No+Cover'"></td>
+            <td><img src="${book.coverImage}" class="book-cover-thumb" onerror="this.src='https://via.placeholder.com/50x70/cccccc?text=No+Cover'"></td>
             <td><strong>${book.title}</strong></td>
             <td>${book.author}</td>
             <td>${getCategoryName(book.category)}</td>
             <td>${book.downloads || 0}</td>
-            <td>${book.views || 0}</td>
-            <td>${book.rating ? book.rating.toFixed(1) : '0'} ⭐ (${book.ratingCount || 0})</td>
             <td>
                 <div class="action-buttons">
-                    <button class="edit-btn" onclick="editBook('${book.id}')">
-                        <i class="fas fa-edit"></i> تعديل
-                    </button>
-                    <button class="delete-btn" onclick="deleteBook('${book.id}')">
-                        <i class="fas fa-trash"></i> حذف
-                    </button>
+                    <button class="edit-btn" onclick="editBook('${book.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="delete-btn" onclick="deleteBook('${book.id}')"><i class="fas fa-trash"></i></button>
+                    <button class="view-btn" onclick="viewBook('${book.id}')"><i class="fas fa-eye"></i></button>
                 </div>
             </td>
         </tr>
     `).join('');
 }
 
-// Load users list
 function loadUsersList(searchTerm = '') {
     let users = SulafAPI.getAllUsers();
-    
     if (searchTerm) {
-        users = users.filter(user => 
-            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        users = users.filter(u => u.username.includes(searchTerm) || u.email.includes(searchTerm));
     }
     
     const tbody = document.getElementById('adminUsersList');
     if (!tbody) return;
     
-    if (users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">لا يوجد مستخدمين</td></tr>';
-        return;
-    }
-    
     tbody.innerHTML = users.map(user => `
         <tr>
-            <td><img src="${user.avatar}" alt="${user.username}" class="user-avatar-thumb"></td>
-            <td><strong>${user.username}</strong></td>
+            <td><img src="${user.avatar}" class="user-avatar-thumb"></td>
+            <td>${user.username}</td>
             <td>${user.email}</td>
-            <td><span class="role-badge ${user.role === 'admin' ? 'admin' : 'user'}">${user.role === 'admin' ? 'مشرف' : 'مستخدم'}</span></td>
-            <td>${new Date(user.joinDate).toLocaleDateString('ar')}</td>
+            <td><span class="role-badge ${user.role}">${user.role === 'admin' ? 'مشرف' : 'مستخدم'}</span></td>
             <td>${user.booksPublished?.length || 0}</td>
-            <td>${user.followers?.length || 0}</td>
             <td>
                 <div class="action-buttons">
-                    <button class="edit-btn" onclick="editUser('${user.id}')">
-                        <i class="fas fa-edit"></i> تعديل
-                    </button>
-                    <button class="delete-btn" onclick="deleteUser('${user.id}')">
-                        <i class="fas fa-trash"></i> حذف
-                    </button>
+                    <button class="edit-btn" onclick="editUser('${user.id}')"><i class="fas fa-edit"></i></button>
+                    ${user.role !== 'admin' ? `<button class="delete-btn" onclick="deleteUser('${user.id}')"><i class="fas fa-trash"></i></button>` : ''}
                 </div>
             </td>
         </tr>
     `).join('');
 }
 
-// Load reviews list
 function loadReviewsList() {
     const reviewsList = document.getElementById('adminReviewsList');
     const allBooks = SulafAPI.getAllBooks();
@@ -160,212 +128,413 @@ function loadReviewsList() {
         const book = allBooks.find(b => b.id === bookId);
         bookReviews.forEach(review => {
             const user = users.find(u => u.id === review.userId);
-            allReviews.push({
-                ...review,
-                book,
-                user
-            });
+            allReviews.push({...review, book, user});
         });
     });
     
     allReviews.sort((a, b) => new Date(b.date) - new Date(a.date));
     
+    if (!reviewsList) return;
+    
     if (allReviews.length === 0) {
-        reviewsList.innerHTML = '<p style="text-align: center;">لا توجد مراجعات</p>';
+        reviewsList.innerHTML = '<p style="text-align:center">لا توجد مراجعات</p>';
         return;
     }
     
     reviewsList.innerHTML = allReviews.map(review => `
         <div class="review-card">
             <div class="review-header">
-                <img src="${review.user?.avatar}" alt="${review.user?.username}">
+                <img src="${review.user?.avatar || 'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'">
                 <div>
-                    <strong>${review.user?.username}</strong>
+                    <strong>${review.user?.username || 'مستخدم'}</strong>
                     <div class="review-stars">${generateStars(review.rating)}</div>
                 </div>
                 <small>${new Date(review.date).toLocaleDateString('ar')}</small>
-                <button class="delete-btn" onclick="deleteReview('${review.book?.id}', '${review.userId}')" style="margin-right: auto;">
+                <button class="delete-btn" onclick="deleteReview('${review.book?.id}', '${review.userId}')" style="margin-right:auto;">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
             <p class="review-comment">${review.comment}</p>
-            <div class="review-book">
-                <i class="fas fa-book"></i> ${review.book?.title} - ${review.book?.author}
-            </div>
+            <div class="review-book">📖 ${review.book?.title || 'كتاب غير معروف'} - ${review.book?.author || 'مؤلف غير معروف'}</div>
         </div>
     `).join('');
 }
 
-// Load top books
 function loadTopBooks() {
     const books = SulafAPI.getAllBooks();
     const topBooks = [...books].sort((a, b) => (b.downloads || 0) - (a.downloads || 0)).slice(0, 10);
     const container = document.getElementById('topBooksList');
+    if (!container) return;
     
-    container.innerHTML = topBooks.map((book, index) => `
+    container.innerHTML = topBooks.map((book, i) => `
         <div class="top-book-item">
-            <div class="top-book-rank">#${index + 1}</div>
-            <div class="top-book-title">
-                <strong>${book.title}</strong>
-                <small>${book.author}</small>
-            </div>
-            <div class="top-book-downloads">
-                <i class="fas fa-download"></i> ${book.downloads || 0}
-            </div>
+            <div class="top-book-rank">#${i+1}</div>
+            <div class="top-book-title">${book.title}</div>
+            <div class="top-book-downloads"><i class="fas fa-download"></i> ${book.downloads || 0}</div>
         </div>
     `).join('');
 }
 
-// Load recent activity
-function loadRecentActivity() {
-    const books = SulafAPI.getAllBooks();
-    const recentBooks = [...books].sort((a, b) => new Date(b.publishedDate) - new Date(a.publishedDate)).slice(0, 10);
-    const container = document.getElementById('recentActivity');
-    
-    container.innerHTML = recentBooks.map(book => `
-        <div class="activity-item">
-            <div class="activity-icon">
-                <i class="fas fa-book"></i>
-            </div>
-            <div class="activity-content">
-                <strong>${book.title}</strong> تمت إضافته بواسطة <strong>${book.author}</strong>
-                <div class="activity-time">${timeAgo(new Date(book.publishedDate))}</div>
-            </div>
-        </div>
-    `).join('');
-}
-
-// Load top authors
 function loadTopAuthors() {
-    const topAuthors = SulafAPI.getTopAuthors();
+    const books = SulafAPI.getAllBooks();
+    const authorStats = {};
+    books.forEach(book => {
+        if (!authorStats[book.author]) {
+            authorStats[book.author] = { name: book.author, books: 0, downloads: 0 };
+        }
+        authorStats[book.author].books++;
+        authorStats[book.author].downloads += book.downloads || 0;
+    });
+    
+    const topAuthors = Object.values(authorStats).sort((a, b) => b.downloads - a.downloads).slice(0, 5);
     const container = document.getElementById('topAuthorsList');
+    if (!container) return;
     
-    if (topAuthors.length === 0) {
-        container.innerHTML = '<p>لا توجد بيانات</p>';
-        return;
-    }
-    
-    container.innerHTML = topAuthors.map((author, index) => `
+    container.innerHTML = topAuthors.map(author => `
         <div class="author-item">
-            <div><strong>${index + 1}.</strong> ${author.name}</div>
-            <div>
-                <i class="fas fa-book"></i> ${author.books} كتب
-                <i class="fas fa-download"></i> ${author.downloads} تحميل
-            </div>
+            <div><strong>${author.name}</strong></div>
+            <div><i class="fas fa-book"></i> ${author.books} كتب | <i class="fas fa-download"></i> ${author.downloads}</div>
         </div>
     `).join('');
 }
 
-// Load user activity stats
-function loadUserActivityStats() {
-    const users = SulafAPI.getAllUsers();
-    const stats = {
-        totalUsers: users.length,
-        activeUsers: users.filter(u => u.readingStats?.booksRead > 0).length,
-        totalBooksRead: users.reduce((sum, u) => sum + (u.readingStats?.booksRead || 0), 0),
-        totalPagesRead: users.reduce((sum, u) => sum + (u.readingStats?.totalPages || 0), 0)
+function loadBooksByCategoryChart() {
+    const books = SulafAPI.getAllBooks();
+    const categories = {
+        fantasy: 0, romance: 0, mystery: 0, 'science-fiction': 0, horror: 0, historical: 0, general: 0
     };
     
-    const container = document.getElementById('userActivityStats');
-    container.innerHTML = `
-        <div class="activity-stat">
-            <div class="number">${stats.totalUsers}</div>
-            <div>إجمالي المستخدمين</div>
-        </div>
-        <div class="activity-stat">
-            <div class="number">${stats.activeUsers}</div>
-            <div>مستخدمين نشطين</div>
-        </div>
-        <div class="activity-stat">
-            <div class="number">${stats.totalBooksRead}</div>
-            <div>كتب مقروءة</div>
-        </div>
-        <div class="activity-stat">
-            <div class="number">${stats.totalPagesRead}</div>
-            <div>صفحة مقروءة</div>
-        </div>
-    `;
-}
-
-// Load top rated books
-function loadTopRatedBooks() {
-    const books = SulafAPI.getAllBooks();
-    const topRated = [...books].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 10);
-    const container = document.getElementById('topRatedBooks');
+    books.forEach(book => {
+        if (categories[book.category] !== undefined) {
+            categories[book.category]++;
+        }
+    });
     
-    container.innerHTML = topRated.map((book, index) => `
-        <div class="book-item">
-            <div><strong>${index + 1}.</strong> ${book.title}</div>
-            <div>
-                ${book.rating ? book.rating.toFixed(1) : '0'} ⭐
-                <small>(${book.ratingCount || 0} تقييم)</small>
-            </div>
+    const container = document.getElementById('booksByCategoryChart');
+    if (!container) return;
+    
+    const maxCount = Math.max(...Object.values(categories), 1);
+    
+    container.innerHTML = Object.entries(categories).map(([cat, count]) => `
+        <div class="chart-bar" style="height: ${(count / maxCount) * 150}px">
+            <span>${getCategoryName(cat)}</span>
         </div>
     `).join('');
 }
 
-// Load users for notification dropdown
 function loadUsersForNotification() {
     const users = SulafAPI.getAllUsers();
     const select = document.getElementById('targetUser');
     if (select) {
         select.innerHTML = '<option value="">اختر مستخدم...</option>' + 
-            users.filter(u => u.role !== 'admin').map(user => `
-                <option value="${user.id}">${user.username} (${user.email})</option>
-            `).join('');
+            users.filter(u => u.role !== 'admin').map(u => `<option value="${u.id}">${u.username}</option>`).join('');
     }
 }
 
-// Load notification history
-function loadNotificationHistory() {
-    // Store sent notifications in localStorage
-    const history = JSON.parse(localStorage.getItem('admin_notification_history') || '[]');
-    const container = document.getElementById('notificationHistory');
+// ==================== FILE UPLOAD FUNCTIONS (FIXED) ====================
+
+function setupFileUpload() {
+    console.log('Setting up file upload...');
     
-    if (history.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #666;">لا توجد إشعارات مرسلة بعد</p>';
-        return;
+    // PDF File Input
+    const pdfInput = document.getElementById('bookPdfFile');
+    if (pdfInput) {
+        // Remove old listeners to avoid duplicates
+        const newPdfInput = pdfInput.cloneNode(true);
+        pdfInput.parentNode.replaceChild(newPdfInput, pdfInput);
+        
+        newPdfInput.addEventListener('change', function(e) {
+            console.log('PDF file selected:', e.target.files);
+            if (e.target.files && e.target.files[0]) {
+                handlePdfFile(e.target.files[0]);
+            }
+        });
+        
+        // Update reference
+        window.pdfInputRef = newPdfInput;
     }
     
-    container.innerHTML = history.map(notif => `
-        <div class="notification-history-item">
-            <div class="notification-history-info">
-                <h4>${notif.title}</h4>
-                <p>${notif.message}</p>
-                <small>إلى: ${notif.target === 'all' ? 'جميع المستخدمين' : notif.target}</small>
-            </div>
-            <div class="notification-history-date">
-                ${new Date(notif.date).toLocaleString('ar')}
-            </div>
-        </div>
-    `).join('');
+    // Cover File Input
+    const coverInput = document.getElementById('bookCoverFile');
+    if (coverInput) {
+        const newCoverInput = coverInput.cloneNode(true);
+        coverInput.parentNode.replaceChild(newCoverInput, coverInput);
+        
+        newCoverInput.addEventListener('change', function(e) {
+            console.log('Cover file selected:', e.target.files);
+            if (e.target.files && e.target.files[0]) {
+                handleCoverFile(e.target.files[0]);
+            }
+        });
+        
+        window.coverInputRef = newCoverInput;
+    }
+    
+    // Setup upload area clicks
+    const pdfUploadArea = document.getElementById('pdfUploadArea');
+    if (pdfUploadArea) {
+        // Remove old click listener
+        const newPdfArea = pdfUploadArea.cloneNode(true);
+        pdfUploadArea.parentNode.replaceChild(newPdfArea, pdfUploadArea);
+        
+        newPdfArea.addEventListener('click', function(e) {
+            if (e.target.closest('.upload-btn')) {
+                const input = document.getElementById('bookPdfFile');
+                if (input) input.click();
+            } else if (!e.target.closest('.remove-file')) {
+                const input = document.getElementById('bookPdfFile');
+                if (input) input.click();
+            }
+        });
+        
+        // Drag and drop
+        newPdfArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            newPdfArea.classList.add('dragover');
+        });
+        
+        newPdfArea.addEventListener('dragleave', () => {
+            newPdfArea.classList.remove('dragover');
+        });
+        
+        newPdfArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            newPdfArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length && files[0].type === 'application/pdf') {
+                handlePdfFile(files[0]);
+            } else {
+                showToast('الرجاء إسقاط ملف PDF صالح', 'error');
+            }
+        });
+    }
+    
+    // Cover upload area
+    const coverUploadArea = document.getElementById('coverUploadArea');
+    if (coverUploadArea) {
+        const newCoverArea = coverUploadArea.cloneNode(true);
+        coverUploadArea.parentNode.replaceChild(newCoverArea, coverUploadArea);
+        
+        newCoverArea.addEventListener('click', function(e) {
+            if (e.target.closest('.upload-btn')) {
+                const input = document.getElementById('bookCoverFile');
+                if (input) input.click();
+            } else if (!e.target.closest('.remove-file')) {
+                const input = document.getElementById('bookCoverFile');
+                if (input) input.click();
+            }
+        });
+        
+        newCoverArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            newCoverArea.classList.add('dragover');
+        });
+        
+        newCoverArea.addEventListener('dragleave', () => {
+            newCoverArea.classList.remove('dragover');
+        });
+        
+        newCoverArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            newCoverArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length && files[0].type.startsWith('image/')) {
+                handleCoverFile(files[0]);
+            } else {
+                showToast('الرجاء إسقاط صورة صالحة', 'error');
+            }
+        });
+    }
 }
 
-// Save notification to history
-function saveNotificationToHistory(title, message, target, type) {
-    const history = JSON.parse(localStorage.getItem('admin_notification_history') || '[]');
-    history.unshift({
-        id: Date.now().toString(),
-        title,
-        message,
-        target,
-        type,
-        date: new Date().toISOString()
+function handlePdfFile(file) {
+    console.log('Handling PDF file:', file.name, file.size);
+    
+    if (file.type !== 'application/pdf') {
+        showToast('الرجاء اختيار ملف PDF صالح', 'error');
+        return false;
+    }
+    
+    if (file.size > 50 * 1024 * 1024) {
+        showToast('حجم الملف كبير جداً (الحد الأقصى 50MB)', 'error');
+        return false;
+    }
+    
+    currentPdfFile = file;
+    
+    // Create object URL for preview
+    const url = URL.createObjectURL(file);
+    window.currentPdfUrl = url;
+    
+    // Hide upload area, show preview
+    const uploadArea = document.getElementById('pdfUploadArea');
+    const preview = document.getElementById('pdfPreview');
+    const fileNameSpan = document.getElementById('pdfFileName');
+    const fileInfo = document.getElementById('pdfFileInfo');
+    
+    if (uploadArea) uploadArea.style.display = 'none';
+    if (preview) preview.style.display = 'flex';
+    if (fileNameSpan) fileNameSpan.textContent = file.name;
+    
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+    if (fileInfo) {
+        fileInfo.innerHTML = `<i class="fas fa-check-circle"></i> تم الرفع (${sizeMB} MB)`;
+        fileInfo.style.color = '#2E7D32';
+    }
+    
+    showToast(`تم رفع ملف PDF: ${file.name}`, 'success');
+    return true;
+}
+
+function handleCoverFile(file) {
+    console.log('Handling cover file:', file.name, file.type);
+    
+    if (!file.type.startsWith('image/')) {
+        showToast('الرجاء اختيار صورة صالحة', 'error');
+        return false;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('حجم الصورة كبير جداً (الحد الأقصى 5MB)', 'error');
+        return false;
+    }
+    
+    currentCoverFile = file;
+    
+    // Create object URL for preview
+    const url = URL.createObjectURL(file);
+    window.currentCoverUrl = url;
+    
+    // Hide upload area, show preview
+    const uploadArea = document.getElementById('coverUploadArea');
+    const preview = document.getElementById('coverPreview');
+    const previewImg = document.getElementById('coverPreviewImg');
+    
+    if (uploadArea) uploadArea.style.display = 'none';
+    if (preview) preview.style.display = 'block';
+    if (previewImg) previewImg.src = url;
+    
+    showToast('تم رفع صورة الغلاف', 'success');
+    return true;
+}
+
+function removePdfFile() {
+    console.log('Removing PDF file');
+    currentPdfFile = null;
+    window.currentPdfUrl = null;
+    
+    const uploadArea = document.getElementById('pdfUploadArea');
+    const preview = document.getElementById('pdfPreview');
+    const fileInput = document.getElementById('bookPdfFile');
+    const fileInfo = document.getElementById('pdfFileInfo');
+    
+    if (uploadArea) uploadArea.style.display = 'flex';
+    if (preview) preview.style.display = 'none';
+    if (fileInput) fileInput.value = '';
+    if (fileInfo) fileInfo.innerHTML = '';
+    
+    showToast('تم إلغاء اختيار ملف PDF', 'info');
+}
+
+function removeCoverFile() {
+    console.log('Removing cover file');
+    currentCoverFile = null;
+    window.currentCoverUrl = null;
+    
+    const uploadArea = document.getElementById('coverUploadArea');
+    const preview = document.getElementById('coverPreview');
+    const fileInput = document.getElementById('bookCoverFile');
+    
+    if (uploadArea) uploadArea.style.display = 'flex';
+    if (preview) preview.style.display = 'none';
+    if (fileInput) fileInput.value = '';
+    
+    showToast('تم إلغاء اختيار صورة الغلاف', 'info');
+}
+
+// Convert file to Base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
     });
-    // Keep only last 100 notifications
-    if (history.length > 100) history.pop();
-    localStorage.setItem('admin_notification_history', JSON.stringify(history));
-    loadNotificationHistory();
 }
 
-// Setup all admin event listeners
+// Add book with files
+async function addBookWithFiles() {
+    const title = document.getElementById('bookTitle')?.value;
+    const author = document.getElementById('bookAuthor')?.value;
+    const category = document.getElementById('bookCategory')?.value;
+    const description = document.getElementById('bookDesc')?.value;
+    const tagsInput = document.getElementById('bookTags');
+    const tags = tagsInput ? tagsInput.value.split(',').map(t => t.trim()) : [];
+    
+    if (!title || !author) {
+        showToast('الرجاء إدخال عنوان الكتاب واسم المؤلف', 'error');
+        return false;
+    }
+    
+    if (!currentPdfFile) {
+        showToast('الرجاء رفع ملف PDF للكتاب', 'error');
+        return false;
+    }
+    
+    try {
+        showToast('جاري رفع الملفات...', 'info');
+        
+        // Convert files to Base64
+        const pdfBase64 = await fileToBase64(currentPdfFile);
+        let coverBase64 = null;
+        
+        if (currentCoverFile) {
+            coverBase64 = await fileToBase64(currentCoverFile);
+        }
+        
+        const coverImage = coverBase64 || 'https://via.placeholder.com/300x400/6B4E71/ffffff?text=Book+Cover';
+        
+        const newBook = {
+            id: Date.now().toString(),
+            title,
+            author,
+            category,
+            description,
+            coverImage: coverImage,
+            pdfData: pdfBase64,
+            pdfUrl: pdfBase64,
+            downloadUrl: pdfBase64,
+            tags: tags,
+            downloads: 0,
+            views: 0,
+            rating: 0,
+            ratingCount: 0,
+            publishedDate: new Date().toISOString(),
+            authorId: SulafAPI.getCurrentUser()?.id || 'admin'
+        };
+        
+        // Save to localStorage
+        const books = SulafAPI.getAllBooks();
+        books.push(newBook);
+        localStorage.setItem(STORAGE_KEYS.books, JSON.stringify(books));
+        
+        return true;
+    } catch (error) {
+        console.error('Error uploading files:', error);
+        showToast('حدث خطأ أثناء رفع الملفات', 'error');
+        return false;
+    }
+}
+
+// ==================== EVENT LISTENERS ====================
+
 function setupAdminEventListeners() {
-    // Login form
+    // Login
     const loginForm = document.getElementById('adminLoginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const password = document.getElementById('adminPassword').value;
+            const password = document.getElementById('adminPassword')?.value;
             if (SulafAPI.adminLogin(password)) {
                 showAdminDashboard();
                 loadAdminData();
@@ -384,176 +553,120 @@ function setupAdminEventListeners() {
         });
     }
     
-    // Admin menu tabs
+    // Menu tabs
     document.querySelectorAll('.admin-menu li').forEach(item => {
         item.addEventListener('click', () => {
             const tab = item.dataset.tab;
             document.querySelectorAll('.admin-menu li').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
-            
             document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(`${tab}Tab`).classList.add('active');
+            const targetTab = document.getElementById(`${tab}Tab`);
+            if (targetTab) targetTab.classList.add('active');
             
-            // Reload data when switching tabs
             if (tab === 'users') loadUsersList();
             if (tab === 'reviews') loadReviewsList();
-            if (tab === 'notifications') loadUsersForNotification();
+            if (tab === 'add') setupFileUpload();
         });
     });
     
-    // Add book form
+    // Add Book Form
     const addBookForm = document.getElementById('addBookForm');
     if (addBookForm) {
-        addBookForm.addEventListener('submit', (e) => {
+        addBookForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const currentUser = SulafAPI.getCurrentUser();
-            const tags = document.getElementById('bookTags').value.split(',').map(t => t.trim());
-            
-            const newBook = {
-                title: document.getElementById('bookTitle').value,
-                author: document.getElementById('bookAuthor').value,
-                category: document.getElementById('bookCategory').value,
-                description: document.getElementById('bookDesc').value,
-                coverImage: document.getElementById('bookCover').value || 'https://via.placeholder.com/300x400/6B4E71/ffffff?text=Book+Cover',
-                pdfUrl: document.getElementById('bookPdfUrl').value,
-                downloadUrl: document.getElementById('bookDownloadUrl').value || document.getElementById('bookPdfUrl').value,
-                tags: tags
-            };
-            
-            SulafAPI.addBook(newBook, currentUser.id);
-            
-            // Send notification to all users about new book
-            SulafAPI.sendGlobalNotification(
-                '📚 كتاب جديد',
-                `تمت إضافة كتاب جديد: ${newBook.title} للكاتب ${newBook.author}`,
-                'book',
-                `/index.html?book=${newBook.id}`
-            );
-            
-            saveNotificationToHistory(newBook.title, `تمت إضافة كتاب جديد`, 'all', 'book');
-            
-            alert('تم إضافة الكتاب بنجاح وإرسال إشعار لجميع المستخدمين');
-            addBookForm.reset();
-            loadBooksList();
-            loadDashboardStats();
+            const success = await addBookWithFiles();
+            if (success) {
+                const title = document.getElementById('bookTitle')?.value || '';
+                const author = document.getElementById('bookAuthor')?.value || '';
+                
+                // Send notification
+                SulafAPI.sendGlobalNotification(
+                    '📚 كتاب جديد',
+                    `تمت إضافة كتاب جديد: ${title} للكاتب ${author}`,
+                    'book'
+                );
+                
+                showToast('تم نشر الكتاب بنجاح!', 'success');
+                
+                // Reset form
+                addBookForm.reset();
+                removePdfFile();
+                removeCoverFile();
+                loadBooksList();
+                loadDashboardStats();
+                
+                // Switch to books tab
+                const booksTab = document.querySelector('.admin-menu li[data-tab="books"]');
+                if (booksTab) booksTab.click();
+            }
         });
     }
     
-    // Global notification form
+    // Global Notification
     const globalNotifForm = document.getElementById('sendGlobalNotificationForm');
     if (globalNotifForm) {
         globalNotifForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const title = document.getElementById('globalNotifTitle').value;
-            const message = document.getElementById('globalNotifMessage').value;
-            const type = document.getElementById('globalNotifType').value;
-            const link = document.getElementById('globalNotifLink').value;
-            
-            SulafAPI.sendGlobalNotification(title, message, type, link || null);
-            saveNotificationToHistory(title, message, 'all', type);
-            
-            alert('تم إرسال الإشعار لجميع المستخدمين');
-            globalNotifForm.reset();
+            const title = document.getElementById('globalNotifTitle')?.value;
+            const message = document.getElementById('globalNotifMessage')?.value;
+            if (title && message) {
+                SulafAPI.sendGlobalNotification(title, message, 'info');
+                alert('تم إرسال الإشعار لجميع المستخدمين');
+                globalNotifForm.reset();
+            }
         });
     }
     
-    // User notification form
+    // User Notification
     const userNotifForm = document.getElementById('sendUserNotificationForm');
     if (userNotifForm) {
         userNotifForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const userId = document.getElementById('targetUser').value;
-            const title = document.getElementById('userNotifTitle').value;
-            const message = document.getElementById('userNotifMessage').value;
-            const type = document.getElementById('userNotifType').value;
-            
-            if (!userId) {
-                alert('الرجاء اختيار مستخدم');
-                return;
+            const userId = document.getElementById('targetUser')?.value;
+            const title = document.getElementById('userNotifTitle')?.value;
+            const message = document.getElementById('userNotifMessage')?.value;
+            if (userId && title && message) {
+                SulafAPI.sendNotification(userId, title, message, 'info');
+                alert('تم إرسال الإشعار');
+                userNotifForm.reset();
             }
-            
-            const users = SulafAPI.getAllUsers();
-            const targetUser = users.find(u => u.id === userId);
-            
-            SulafAPI.sendNotification(userId, title, message, type);
-            saveNotificationToHistory(title, message, targetUser?.username || userId, type);
-            
-            alert(`تم إرسال الإشعار للمستخدم ${targetUser?.username}`);
-            userNotifForm.reset();
         });
     }
     
-    // Change password form
-    const changePasswordForm = document.getElementById('changePasswordForm');
-    if (changePasswordForm) {
-        changePasswordForm.addEventListener('submit', (e) => {
+    // Change Password
+    const changePassForm = document.getElementById('changePasswordForm');
+    if (changePassForm) {
+        changePassForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const currentPassword = document.getElementById('currentPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+            const current = document.getElementById('currentPassword')?.value;
+            const newPass = document.getElementById('newPassword')?.value;
+            const confirm = document.getElementById('confirmPassword')?.value;
             
-            if (newPassword !== confirmPassword) {
+            if (newPass !== confirm) {
                 alert('كلمة المرور الجديدة غير متطابقة');
                 return;
             }
             
-            if (SulafAPI.changeAdminPassword(currentPassword, newPassword)) {
+            if (SulafAPI.changeAdminPassword(current, newPass)) {
                 alert('تم تغيير كلمة المرور بنجاح');
-                changePasswordForm.reset();
+                changePassForm.reset();
             } else {
                 alert('كلمة المرور الحالية غير صحيحة');
             }
         });
     }
     
-    // Site settings form
-    const siteSettingsForm = document.getElementById('siteSettingsForm');
-    if (siteSettingsForm) {
-        siteSettingsForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const siteName = document.getElementById('siteName').value;
-            const siteLogo = document.getElementById('siteLogo').value;
-            const primaryColor = document.getElementById('primaryColor').value;
-            const secondaryColor = document.getElementById('secondaryColor').value;
-            
-            localStorage.setItem('site_settings', JSON.stringify({
-                siteName,
-                siteLogo,
-                primaryColor,
-                secondaryColor
-            }));
-            
-            // Apply colors
-            document.documentElement.style.setProperty('--primary', primaryColor);
-            document.documentElement.style.setProperty('--secondary', secondaryColor);
-            
-            alert('تم حفظ الإعدادات بنجاح');
-        });
-        
-        // Load saved settings
-        const savedSettings = JSON.parse(localStorage.getItem('site_settings') || '{}');
-        if (savedSettings.siteName) document.getElementById('siteName').value = savedSettings.siteName;
-        if (savedSettings.siteLogo) document.getElementById('siteLogo').value = savedSettings.siteLogo;
-        if (savedSettings.primaryColor) document.getElementById('primaryColor').value = savedSettings.primaryColor;
-        if (savedSettings.secondaryColor) document.getElementById('secondaryColor').value = savedSettings.secondaryColor;
-    }
-    
-    // Backup data
+    // Backup
     const backupBtn = document.getElementById('backupDataBtn');
     if (backupBtn) {
         backupBtn.addEventListener('click', () => {
-            const backupData = {
+            const backup = {
                 books: SulafAPI.getAllBooks(),
                 users: JSON.parse(localStorage.getItem(STORAGE_KEYS.users)),
                 reviews: JSON.parse(localStorage.getItem(STORAGE_KEYS.reviews) || '{}'),
-                readingLists: JSON.parse(localStorage.getItem(STORAGE_KEYS.readingLists) || '{}'),
-                readingProgress: JSON.parse(localStorage.getItem(STORAGE_KEYS.readingProgress) || '{}'),
-                quotes: JSON.parse(localStorage.getItem(STORAGE_KEYS.quotes) || '{}'),
-                siteSettings: JSON.parse(localStorage.getItem('site_settings') || '{}'),
-                backupDate: new Date().toISOString()
+                date: new Date().toISOString()
             };
-            
-            const dataStr = JSON.stringify(backupData, null, 2);
+            const dataStr = JSON.stringify(backup, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -561,40 +674,27 @@ function setupAdminEventListeners() {
             a.download = `sulaf_backup_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
-            
-            alert('تم تصدير النسخة الاحتياطية بنجاح');
+            alert('تم تصدير النسخة الاحتياطية');
         });
     }
     
-    // Restore data
+    // Restore
     const restoreBtn = document.getElementById('restoreDataBtn');
     const restoreFile = document.getElementById('restoreFile');
     if (restoreBtn && restoreFile) {
-        restoreBtn.addEventListener('click', () => {
-            restoreFile.click();
-        });
-        
+        restoreBtn.addEventListener('click', () => restoreFile.click());
         restoreFile.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            
             const reader = new FileReader();
             reader.onload = (event) => {
                 try {
-                    const backupData = JSON.parse(event.target.result);
-                    
-                    if (confirm('تحذير: استعادة النسخة الاحتياطية ستستبدل جميع البيانات الحالية. هل أنت متأكد؟')) {
-                        if (backupData.books) localStorage.setItem(STORAGE_KEYS.books, JSON.stringify(backupData.books));
-                        if (backupData.users) localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(backupData.users));
-                        if (backupData.reviews) localStorage.setItem(STORAGE_KEYS.reviews, JSON.stringify(backupData.reviews));
-                        if (backupData.readingLists) localStorage.setItem(STORAGE_KEYS.readingLists, JSON.stringify(backupData.readingLists));
-                        if (backupData.readingProgress) localStorage.setItem(STORAGE_KEYS.readingProgress, JSON.stringify(backupData.readingProgress));
-                        if (backupData.quotes) localStorage.setItem(STORAGE_KEYS.quotes, JSON.stringify(backupData.quotes));
-                        if (backupData.siteSettings) localStorage.setItem('site_settings', JSON.stringify(backupData.siteSettings));
-                        
-                        alert('تم استعادة النسخة الاحتياطية بنجاح');
-                        location.reload();
-                    }
+                    const data = JSON.parse(event.target.result);
+                    if (data.books) localStorage.setItem(STORAGE_KEYS.books, JSON.stringify(data.books));
+                    if (data.users) localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(data.users));
+                    if (data.reviews) localStorage.setItem(STORAGE_KEYS.reviews, JSON.stringify(data.reviews));
+                    alert('تم استعادة النسخة الاحتياطية');
+                    location.reload();
                 } catch (error) {
                     alert('الملف غير صالح');
                 }
@@ -603,24 +703,17 @@ function setupAdminEventListeners() {
         });
     }
     
-    // Export report
-    const exportReportBtn = document.getElementById('exportReportBtn');
-    if (exportReportBtn) {
-        exportReportBtn.addEventListener('click', () => {
+    // Export Report
+    const exportBtn = document.getElementById('exportReportBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
             const stats = SulafAPI.getSiteStats();
             const report = {
                 generatedAt: new Date().toISOString(),
-                statistics: stats,
-                topBooks: stats.topBooks,
-                topAuthors: stats.topAuthors,
-                users: SulafAPI.getAllUsers().map(u => ({
-                    username: u.username,
-                    email: u.email,
-                    joinDate: u.joinDate,
-                    booksPublished: u.booksPublished?.length || 0
-                }))
+                stats,
+                books: SulafAPI.getAllBooks().length,
+                users: SulafAPI.getAllUsers().length
             };
-            
             const dataStr = JSON.stringify(report, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -632,188 +725,48 @@ function setupAdminEventListeners() {
         });
     }
     
-    // Admin search
+    // Search
     const adminSearch = document.getElementById('adminSearch');
     if (adminSearch) {
-        adminSearch.addEventListener('input', (e) => {
-            loadBooksList(e.target.value);
-        });
+        adminSearch.addEventListener('input', (e) => loadBooksList(e.target.value));
     }
-    
-    // User search
     const userSearch = document.getElementById('userSearch');
     if (userSearch) {
-        userSearch.addEventListener('input', (e) => {
-            loadUsersList(e.target.value);
-        });
+        userSearch.addEventListener('input', (e) => loadUsersList(e.target.value));
     }
 }
 
-// Edit book function
-window.editBook = function(bookId) {
-    const books = SulafAPI.getAllBooks();
-    const book = books.find(b => b.id === bookId);
-    if (!book) return;
-    
-    document.getElementById('editBookId').value = book.id;
-    document.getElementById('editTitle').value = book.title;
-    document.getElementById('editAuthor').value = book.author;
-    document.getElementById('editCategory').value = book.category;
-    document.getElementById('editDesc').value = book.description || '';
-    document.getElementById('editCover').value = book.coverImage || '';
-    document.getElementById('editPdfUrl').value = book.pdfUrl || '';
-    document.getElementById('editDownloadUrl').value = book.downloadUrl || '';
-    
-    const modal = document.getElementById('editBookModal');
-    modal.style.display = 'block';
-    
-    const editForm = document.getElementById('editBookForm');
-    editForm.onsubmit = (e) => {
-        e.preventDefault();
-        const updatedBook = {
-            title: document.getElementById('editTitle').value,
-            author: document.getElementById('editAuthor').value,
-            category: document.getElementById('editCategory').value,
-            description: document.getElementById('editDesc').value,
-            coverImage: document.getElementById('editCover').value,
-            pdfUrl: document.getElementById('editPdfUrl').value,
-            downloadUrl: document.getElementById('editDownloadUrl').value
-        };
-        
-        SulafAPI.updateBook(bookId, updatedBook);
-        alert('تم تحديث الكتاب بنجاح');
-        modal.style.display = 'none';
-        loadBooksList();
-        loadDashboardStats();
-    };
-};
+// ==================== HELPER FUNCTIONS ====================
 
-// Delete book function
-window.deleteBook = function(bookId) {
-    if (confirm('هل أنت متأكد من حذف هذا الكتاب؟')) {
-        SulafAPI.deleteBook(bookId);
-        alert('تم حذف الكتاب بنجاح');
-        loadBooksList();
-        loadDashboardStats();
-    }
-};
-
-// Edit user function
-window.editUser = function(userId) {
-    const users = SulafAPI.getAllUsers();
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
-    
-    document.getElementById('editUserId').value = user.id;
-    document.getElementById('editUsername').value = user.username;
-    document.getElementById('editEmail').value = user.email;
-    document.getElementById('editRole').value = user.role;
-    document.getElementById('editBio').value = user.bio || '';
-    
-    const modal = document.getElementById('editUserModal');
-    modal.style.display = 'block';
-    
-    const editForm = document.getElementById('editUserForm');
-    editForm.onsubmit = (e) => {
-        e.preventDefault();
-        const updatedUser = {
-            username: document.getElementById('editUsername').value,
-            email: document.getElementById('editEmail').value,
-            role: document.getElementById('editRole').value,
-            bio: document.getElementById('editBio').value
-        };
-        
-        SulafAPI.updateUserProfile(userId, updatedUser);
-        alert('تم تحديث المستخدم بنجاح');
-        modal.style.display = 'none';
-        loadUsersList();
-        loadDashboardStats();
-    };
-};
-
-// Delete user function
-window.deleteUser = function(userId) {
-    const currentUser = SulafAPI.getCurrentUser();
-    if (currentUser && currentUser.id === userId) {
-        alert('لا يمكن حذف حسابك الحالي');
-        return;
-    }
-    
-    if (confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
-        const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.users));
-        delete users[userId];
-        localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(users));
-        alert('تم حذف المستخدم بنجاح');
-        loadUsersList();
-        loadDashboardStats();
-    }
-};
-
-// Delete review function
-window.deleteReview = function(bookId, userId) {
-    if (confirm('هل أنت متأكد من حذف هذه المراجعة؟')) {
-        const reviews = JSON.parse(localStorage.getItem(STORAGE_KEYS.reviews) || '{}');
-        if (reviews[bookId]) {
-            reviews[bookId] = reviews[bookId].filter(r => r.userId !== userId);
-            if (reviews[bookId].length === 0) {
-                delete reviews[bookId];
-            }
-            localStorage.setItem(STORAGE_KEYS.reviews, JSON.stringify(reviews));
-            
-            // Update book rating
-            SulafAPI.updateBookRating(bookId);
-            
-            alert('تم حذف المراجعة بنجاح');
-            loadReviewsList();
-            loadDashboardStats();
-        }
-    }
-};
-
-// Helper functions
 function getCategoryName(category) {
     const categories = {
-        'fantasy': 'فانتازيا',
-        'romance': 'رومانسي',
-        'mystery': 'غموض',
-        'science-fiction': 'خيال علمي',
-        'horror': 'رعب',
-        'historical': 'تاريخي',
-        'general': 'عام'
+        fantasy: 'فانتازيا', romance: 'رومانسي', mystery: 'غموض',
+        'science-fiction': 'خيال علمي', horror: 'رعب', historical: 'تاريخي', general: 'عام'
     };
     return categories[category] || category;
 }
 
 function generateStars(rating) {
-    const fullStars = Math.floor(rating);
     let stars = '';
-    for (let i = 0; i < fullStars; i++) {
-        stars += '<i class="fas fa-star"></i>';
-    }
-    for (let i = fullStars; i < 5; i++) {
-        stars += '<i class="far fa-star"></i>';
+    for (let i = 1; i <= 5; i++) {
+        if (i <= rating) {
+            stars += '<i class="fas fa-star"></i>';
+        } else if (i - 0.5 <= rating) {
+            stars += '<i class="fas fa-star-half-alt"></i>';
+        } else {
+            stars += '<i class="far fa-star"></i>';
+        }
     }
     return stars;
 }
 
-function timeAgo(date) {
-    const seconds = Math.floor((new Date() - date) / 1000);
-    const intervals = {
-        سنة: 31536000,
-        شهر: 2592000,
-        أسبوع: 604800,
-        يوم: 86400,
-        ساعة: 3600,
-        دقيقة: 60
-    };
-    
-    for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-        const interval = Math.floor(seconds / secondsInUnit);
-        if (interval >= 1) {
-            return `منذ ${interval} ${unit}`;
-        }
-    }
-    return 'الآن';
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-times-circle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
 }
 
 function updateDateTime() {
@@ -824,33 +777,103 @@ function updateDateTime() {
     }
 }
 
+// ==================== CRUD OPERATIONS ====================
+
+window.editBook = function(bookId) {
+    const books = SulafAPI.getAllBooks();
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+    
+    const modal = document.getElementById('editBookModal');
+    if (!modal) return;
+    
+    document.getElementById('editBookId').value = book.id;
+    document.getElementById('editTitle').value = book.title;
+    document.getElementById('editAuthor').value = book.author;
+    document.getElementById('editCategory').value = book.category;
+    document.getElementById('editDesc').value = book.description || '';
+    
+    modal.style.display = 'block';
+    
+    const editForm = document.getElementById('editBookForm');
+    editForm.onsubmit = (e) => {
+        e.preventDefault();
+        SulafAPI.updateBook(bookId, {
+            title: document.getElementById('editTitle').value,
+            author: document.getElementById('editAuthor').value,
+            category: document.getElementById('editCategory').value,
+            description: document.getElementById('editDesc').value
+        });
+        modal.style.display = 'none';
+        loadBooksList();
+        showToast('تم تحديث الكتاب', 'success');
+    };
+};
+
+window.deleteBook = function(bookId) {
+    if (confirm('هل أنت متأكد من حذف هذا الكتاب؟')) {
+        SulafAPI.deleteBook(bookId);
+        loadBooksList();
+        loadDashboardStats();
+        showToast('تم حذف الكتاب', 'success');
+    }
+};
+
+window.viewBook = function(bookId) {
+    window.open(`index.html?book=${bookId}`, '_blank');
+};
+
+window.editUser = function(userId) {
+    const users = SulafAPI.getAllUsers();
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    
+    const newRole = user.role === 'admin' ? 'user' : 'admin';
+    if (confirm(`تغيير دور المستخدم إلى ${newRole === 'admin' ? 'مشرف' : 'مستخدم'}؟`)) {
+        SulafAPI.updateUserProfile(userId, { role: newRole });
+        loadUsersList();
+        showToast('تم تحديث دور المستخدم', 'success');
+    }
+};
+
+window.deleteUser = function(userId) {
+    const currentUser = SulafAPI.getCurrentUser();
+    if (currentUser?.id === userId) {
+        alert('لا يمكن حذف حسابك الحالي');
+        return;
+    }
+    if (confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
+        const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.users));
+        delete users[userId];
+        localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(users));
+        loadUsersList();
+        loadDashboardStats();
+        showToast('تم حذف المستخدم', 'success');
+    }
+};
+
+window.deleteReview = function(bookId, userId) {
+    if (confirm('هل أنت متأكد من حذف هذه المراجعة؟')) {
+        const reviews = JSON.parse(localStorage.getItem(STORAGE_KEYS.reviews) || '{}');
+        if (reviews[bookId]) {
+            reviews[bookId] = reviews[bookId].filter(r => r.userId !== userId);
+            if (reviews[bookId].length === 0) delete reviews[bookId];
+            localStorage.setItem(STORAGE_KEYS.reviews, JSON.stringify(reviews));
+            SulafAPI.updateBookRating(bookId);
+            loadReviewsList();
+            showToast('تم حذف المراجعة', 'success');
+        }
+    }
+};
+
 // Close modals
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('close-edit') || e.target.classList.contains('modal')) {
-        const bookModal = document.getElementById('editBookModal');
-        const userModal = document.getElementById('editUserModal');
-        if (bookModal) bookModal.style.display = 'none';
-        if (userModal) userModal.style.display = 'none';
+        const editModal = document.getElementById('editBookModal');
+        if (editModal) editModal.style.display = 'none';
     }
 });
 
-// Add styles for role badges
-const roleBadgeStyles = document.createElement('style');
-roleBadgeStyles.textContent = `
-    .role-badge {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-    .role-badge.admin {
-        background: var(--primary);
-        color: white;
-    }
-    .role-badge.user {
-        background: #e9ecef;
-        color: #495057;
-    }
-`;
-document.head.appendChild(roleBadgeStyles);
+// Make functions available globally
+window.removePdfFile = removePdfFile;
+window.removeCoverFile = removeCoverFile;
