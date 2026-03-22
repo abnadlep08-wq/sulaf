@@ -100,74 +100,40 @@
                             <div class="date-time" id="currentDateTime"></div>
                         </div>
                         
-                        <!-- Stats Cards -->
                         <div class="stats-grid">
                             <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-book"></i>
-                                </div>
+                                <div class="stat-icon"><i class="fas fa-book"></i></div>
                                 <div class="stat-info">
                                     <h3 id="statTotalBooks">0</h3>
                                     <p>إجمالي الكتب</p>
                                 </div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-users"></i>
-                                </div>
+                                <div class="stat-icon"><i class="fas fa-users"></i></div>
                                 <div class="stat-info">
                                     <h3 id="statTotalUsers">0</h3>
                                     <p>إجمالي المستخدمين</p>
                                 </div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-download"></i>
-                                </div>
+                                <div class="stat-icon"><i class="fas fa-download"></i></div>
                                 <div class="stat-info">
                                     <h3 id="statTotalDownloads">0</h3>
                                     <p>إجمالي التحميلات</p>
                                 </div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-eye"></i>
-                                </div>
+                                <div class="stat-icon"><i class="fas fa-eye"></i></div>
                                 <div class="stat-info">
                                     <h3 id="statTotalViews">0</h3>
                                     <p>إجمالي المشاهدات</p>
                                 </div>
                             </div>
-                            <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <h3 id="statTotalReviews">0</h3>
-                                    <p>إجمالي المراجعات</p>
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <h3 id="statAvgRating">0</h3>
-                                    <p>متوسط التقييم</p>
-                                </div>
-                            </div>
                         </div>
                         
-                        <!-- Top Books -->
                         <div class="admin-section">
                             <h3><i class="fas fa-trophy"></i> الكتب الأكثر تحميلاً</h3>
                             <div class="top-books-list" id="topBooksList"></div>
-                        </div>
-                        
-                        <!-- Recent Activity -->
-                        <div class="admin-section">
-                            <h3><i class="fas fa-clock"></i> النشاطات الأخيرة</h3>
-                            <div class="recent-activity" id="recentActivity"></div>
                         </div>
                     </div>
                     
@@ -182,81 +148,109 @@
                         <div class="books-table-container">
                             <table class="books-table">
                                 <thead>
-                                    <tr>
-                                        <th>الغلاف</th>
-                                        <th>العنوان</th>
-                                        <th>المؤلف</th>
-                                        <th>التصنيف</th>
-                                        <th>التحميلات</th>
-                                        <th>المشاهدات</th>
-                                        <th>التقييم</th>
-                                        <th>الإجراءات</th>
-                                    </tr>
+                                    <tr><th>الغلاف</th><th>العنوان</th><th>المؤلف</th><th>التصنيف</th><th>التحميلات</th><th>الإجراءات</th></tr>
                                 </thead>
                                 <tbody id="adminBooksList"></tbody>
                             </table>
                         </div>
                     </div>
                     
-                    <!-- Add Book Tab -->
+                    <!-- Add Book Tab with File Upload -->
                     <div id="addTab" class="admin-tab">
                         <div class="tab-header">
                             <h2><i class="fas fa-plus-circle"></i> إضافة كتاب جديد</h2>
+                            <div class="upload-tips">
+                                <i class="fas fa-info-circle"></i>
+                                <span>يمكنك رفع ملف PDF وصورة الغلاف مباشرة من جهازك</span>
+                            </div>
                         </div>
-                        <form id="addBookForm" class="admin-form">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>عنوان الكتاب *</label>
-                                    <input type="text" id="bookTitle" required placeholder="أدخل عنوان الكتاب">
-                                </div>
-                                <div class="form-group">
-                                    <label>اسم المؤلف *</label>
-                                    <input type="text" id="bookAuthor" required placeholder="أدخل اسم المؤلف">
+                        
+                        <form id="addBookForm" class="admin-form" enctype="multipart/form-data">
+                            <!-- File Upload Section -->
+                            <div class="upload-section">
+                                <h3><i class="fas fa-cloud-upload-alt"></i> رفع الملفات</h3>
+                                <div class="upload-grid">
+                                    <!-- PDF Upload -->
+                                    <div class="upload-card">
+                                        <div class="upload-area" id="pdfUploadArea">
+                                            <i class="fas fa-file-pdf"></i>
+                                            <p>اسحب ملف PDF هنا أو اضغط للاختيار</p>
+                                            <input type="file" id="bookPdfFile" accept=".pdf" style="display: none;">
+                                            <button type="button" class="upload-btn" onclick="document.getElementById('bookPdfFile').click()">
+                                                <i class="fas fa-folder-open"></i> اختر ملف PDF
+                                            </button>
+                                        </div>
+                                        <div id="pdfPreview" class="file-preview" style="display: none;">
+                                            <i class="fas fa-file-pdf"></i>
+                                            <span id="pdfFileName"></span>
+                                            <button type="button" class="remove-file" onclick="removePdfFile()">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                        <div class="file-info" id="pdfFileInfo"></div>
+                                    </div>
+                                    
+                                    <!-- Cover Image Upload -->
+                                    <div class="upload-card">
+                                        <div class="upload-area" id="coverUploadArea">
+                                            <i class="fas fa-image"></i>
+                                            <p>اسحب صورة الغلاف هنا أو اضغط للاختيار</p>
+                                            <input type="file" id="bookCoverFile" accept="image/*" style="display: none;">
+                                            <button type="button" class="upload-btn" onclick="document.getElementById('bookCoverFile').click()">
+                                                <i class="fas fa-folder-open"></i> اختر صورة الغلاف
+                                            </button>
+                                        </div>
+                                        <div id="coverPreview" class="cover-preview" style="display: none;">
+                                            <img id="coverPreviewImg" src="" alt="Cover Preview">
+                                            <button type="button" class="remove-file" onclick="removeCoverFile()">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>التصنيف *</label>
-                                    <select id="bookCategory" required>
-                                        <option value="fantasy">فانتازيا</option>
-                                        <option value="romance">رومانسي</option>
-                                        <option value="mystery">غموض</option>
-                                        <option value="science-fiction">خيال علمي</option>
-                                        <option value="horror">رعب</option>
-                                        <option value="historical">تاريخي</option>
-                                        <option value="general">عام</option>
-                                    </select>
+                            <!-- Book Information -->
+                            <div class="book-info-section">
+                                <h3><i class="fas fa-info-circle"></i> معلومات الكتاب</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>عنوان الكتاب *</label>
+                                        <input type="text" id="bookTitle" required placeholder="أدخل عنوان الكتاب">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>اسم المؤلف *</label>
+                                        <input type="text" id="bookAuthor" required placeholder="أدخل اسم المؤلف">
+                                    </div>
                                 </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>التصنيف *</label>
+                                        <select id="bookCategory" required>
+                                            <option value="fantasy">فانتازيا</option>
+                                            <option value="romance">رومانسي</option>
+                                            <option value="mystery">غموض</option>
+                                            <option value="science-fiction">خيال علمي</option>
+                                            <option value="horror">رعب</option>
+                                            <option value="historical">تاريخي</option>
+                                            <option value="general">عام</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>الكلمات المفتاحية</label>
+                                        <input type="text" id="bookTags" placeholder="مفصولة بفاصلة">
+                                    </div>
+                                </div>
+                                
                                 <div class="form-group">
-                                    <label>رابط غلاف الكتاب</label>
-                                    <input type="url" id="bookCover" placeholder="https://...">
+                                    <label>وصف الكتاب</label>
+                                    <textarea id="bookDesc" rows="4" placeholder="أدخل وصفاً مختصراً للكتاب..."></textarea>
                                 </div>
                             </div>
                             
-                            <div class="form-group">
-                                <label>وصف الكتاب</label>
-                                <textarea id="bookDesc" rows="4" placeholder="أدخل وصفاً مختصراً للكتاب..."></textarea>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>رابط ملف PDF *</label>
-                                    <input type="url" id="bookPdfUrl" required placeholder="https://...">
-                                </div>
-                                <div class="form-group">
-                                    <label>رابط التحميل</label>
-                                    <input type="url" id="bookDownloadUrl" placeholder="https://... (اختياري)">
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>الكلمات المفتاحية (Tags)</label>
-                                <input type="text" id="bookTags" placeholder="أدخل كلمات مفتاحية مفصولة بفاصلة">
-                            </div>
-                            
-                            <button type="submit" class="btn-primary">
-                                <i class="fas fa-save"></i> إضافة الكتاب
+                            <button type="submit" class="btn-primary btn-submit">
+                                <i class="fas fa-save"></i> نشر الكتاب
                             </button>
                         </form>
                     </div>
@@ -272,16 +266,7 @@
                         <div class="users-table-container">
                             <table class="users-table">
                                 <thead>
-                                    <tr>
-                                        <th>الصورة</th>
-                                        <th>اسم المستخدم</th>
-                                        <th>البريد الإلكتروني</th>
-                                        <th>الدور</th>
-                                        <th>تاريخ التسجيل</th>
-                                        <th>الكتب المنشورة</th>
-                                        <th>المتابعون</th>
-                                        <th>الإجراءات</th>
-                                    </tr>
+                                    <tr><th>الصورة</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>الدور</th><th>الكتب المنشورة</th><th>الإجراءات</th></tr>
                                 </thead>
                                 <tbody id="adminUsersList"></tbody>
                             </table>
@@ -302,106 +287,57 @@
                             <h2><i class="fas fa-bell"></i> إدارة الإشعارات</h2>
                         </div>
                         
-                        <!-- Send Global Notification -->
                         <div class="settings-card">
-                            <h3><i class="fas fa-globe"></i> إرسال إشعار عام لجميع المستخدمين</h3>
+                            <h3><i class="fas fa-globe"></i> إرسال إشعار عام</h3>
                             <form id="sendGlobalNotificationForm" class="admin-form">
                                 <div class="form-group">
-                                    <label>عنوان الإشعار *</label>
-                                    <input type="text" id="globalNotifTitle" required placeholder="مثال: كتاب جديد تمت إضافته">
+                                    <label>عنوان الإشعار</label>
+                                    <input type="text" id="globalNotifTitle" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>محتوى الإشعار *</label>
-                                    <textarea id="globalNotifMessage" rows="4" required placeholder="أدخل نص الإشعار..."></textarea>
+                                    <label>محتوى الإشعار</label>
+                                    <textarea id="globalNotifMessage" rows="3" required></textarea>
                                 </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>نوع الإشعار</label>
-                                        <select id="globalNotifType">
-                                            <option value="info">📘 معلومات</option>
-                                            <option value="success">✅ نجاح</option>
-                                            <option value="warning">⚠️ تحذير</option>
-                                            <option value="book">📚 كتاب جديد</option>
-                                            <option value="event">🎉 حدث</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>رابط (اختياري)</label>
-                                        <input type="url" id="globalNotifLink" placeholder="https://...">
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn-primary">
-                                    <i class="fas fa-paper-plane"></i> إرسال للجميع
-                                </button>
+                                <button type="submit" class="btn-primary">إرسال للجميع</button>
                             </form>
                         </div>
                         
-                        <!-- Send User Specific Notification -->
-                        <div class="settings-card" style="margin-top: 2rem;">
-                            <h3><i class="fas fa-user"></i> إرسال إشعار لمستخدم محدد</h3>
+                        <div class="settings-card">
+                            <h3><i class="fas fa-user"></i> إرسال إشعار لمستخدم</h3>
                             <form id="sendUserNotificationForm" class="admin-form">
                                 <div class="form-group">
-                                    <label>اختر المستخدم *</label>
-                                    <select id="targetUser" required>
-                                        <option value="">اختر مستخدم...</option>
-                                    </select>
+                                    <label>اختر المستخدم</label>
+                                    <select id="targetUser" required></select>
                                 </div>
                                 <div class="form-group">
-                                    <label>عنوان الإشعار *</label>
+                                    <label>عنوان الإشعار</label>
                                     <input type="text" id="userNotifTitle" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>محتوى الإشعار *</label>
-                                    <textarea id="userNotifMessage" rows="4" required></textarea>
+                                    <label>محتوى الإشعار</label>
+                                    <textarea id="userNotifMessage" rows="3" required></textarea>
                                 </div>
-                                <div class="form-group">
-                                    <label>نوع الإشعار</label>
-                                    <select id="userNotifType">
-                                        <option value="info">معلومات</option>
-                                        <option value="success">نجاح</option>
-                                        <option value="warning">تحذير</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn-primary">
-                                    <i class="fas fa-paper-plane"></i> إرسال للمستخدم
-                                </button>
+                                <button type="submit" class="btn-primary">إرسال</button>
                             </form>
-                        </div>
-                        
-                        <!-- Notification History -->
-                        <div class="settings-card" style="margin-top: 2rem;">
-                            <h3><i class="fas fa-history"></i> سجل الإشعارات المرسلة</h3>
-                            <div id="notificationHistory" class="notification-history"></div>
                         </div>
                     </div>
                     
                     <!-- Reports Tab -->
                     <div id="reportsTab" class="admin-tab">
                         <div class="tab-header">
-                            <h2><i class="fas fa-chart-bar"></i> التقارير والإحصائيات</h2>
-                            <div class="report-actions">
-                                <button id="exportReportBtn" class="btn-secondary">
-                                    <i class="fas fa-download"></i> تصدير التقرير
-                                </button>
-                            </div>
+                            <h2><i class="fas fa-chart-bar"></i> التقارير</h2>
+                            <button id="exportReportBtn" class="btn-secondary">
+                                <i class="fas fa-download"></i> تصدير
+                            </button>
                         </div>
-                        
                         <div class="reports-grid">
                             <div class="report-card">
                                 <h3>الكتب حسب التصنيف</h3>
                                 <div id="booksByCategoryChart" class="chart-container"></div>
                             </div>
                             <div class="report-card">
-                                <h3>أكثر 5 مؤلفين نشاطاً</h3>
-                                <div id="topAuthorsList" class="top-authors-list"></div>
-                            </div>
-                            <div class="report-card">
-                                <h3>نشاط المستخدمين</h3>
-                                <div id="userActivityStats" class="user-activity-stats"></div>
-                            </div>
-                            <div class="report-card">
-                                <h3>الكتب الأكثر تقييماً</h3>
-                                <div id="topRatedBooks" class="top-rated-books"></div>
+                                <h3>أكثر المؤلفين نشاطاً</h3>
+                                <div id="topAuthorsList"></div>
                             </div>
                         </div>
                     </div>
@@ -409,10 +345,9 @@
                     <!-- Settings Tab -->
                     <div id="settingsTab" class="admin-tab">
                         <div class="tab-header">
-                            <h2><i class="fas fa-cog"></i> إعدادات الموقع</h2>
+                            <h2><i class="fas fa-cog"></i> الإعدادات</h2>
                         </div>
                         
-                        <!-- Change Password -->
                         <div class="settings-card">
                             <h3><i class="fas fa-key"></i> تغيير كلمة المرور</h3>
                             <form id="changePasswordForm" class="admin-form">
@@ -425,50 +360,21 @@
                                     <input type="password" id="newPassword" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>تأكيد كلمة المرور الجديدة</label>
+                                    <label>تأكيد كلمة المرور</label>
                                     <input type="password" id="confirmPassword" required>
                                 </div>
-                                <button type="submit" class="btn-primary">
-                                    <i class="fas fa-save"></i> تغيير كلمة المرور
-                                </button>
+                                <button type="submit" class="btn-primary">تغيير</button>
                             </form>
                         </div>
                         
-                        <!-- Site Settings -->
-                        <div class="settings-card" style="margin-top: 2rem;">
-                            <h3><i class="fas fa-globe"></i> إعدادات الموقع العامة</h3>
-                            <form id="siteSettingsForm" class="admin-form">
-                                <div class="form-group">
-                                    <label>اسم الموقع</label>
-                                    <input type="text" id="siteName" value="Sulaf PDF">
-                                </div>
-                                <div class="form-group">
-                                    <label>شعار الموقع (نص)</label>
-                                    <input type="text" id="siteLogo" value="Sulaf PDF">
-                                </div>
-                                <div class="form-group">
-                                    <label>اللون الأساسي</label>
-                                    <input type="color" id="primaryColor" value="#6B4E71">
-                                </div>
-                                <div class="form-group">
-                                    <label>اللون الثانوي</label>
-                                    <input type="color" id="secondaryColor" value="#D4AF37">
-                                </div>
-                                <button type="submit" class="btn-primary">
-                                    <i class="fas fa-save"></i> حفظ الإعدادات
-                                </button>
-                            </form>
-                        </div>
-                        
-                        <!-- Backup & Restore -->
-                        <div class="settings-card" style="margin-top: 2rem;">
+                        <div class="settings-card">
                             <h3><i class="fas fa-database"></i> النسخ الاحتياطي</h3>
                             <div class="backup-actions">
                                 <button id="backupDataBtn" class="btn-secondary">
-                                    <i class="fas fa-download"></i> تصدير النسخة الاحتياطية
+                                    <i class="fas fa-download"></i> تصدير
                                 </button>
                                 <button id="restoreDataBtn" class="btn-secondary">
-                                    <i class="fas fa-upload"></i> استعادة النسخة الاحتياطية
+                                    <i class="fas fa-upload"></i> استعادة
                                 </button>
                                 <input type="file" id="restoreFile" style="display: none;">
                             </div>
@@ -483,7 +389,7 @@
     <div id="editBookModal" class="modal">
         <div class="modal-content small-modal">
             <div class="modal-header">
-                <h3><i class="fas fa-edit"></i> تعديل الكتاب</h3>
+                <h3>تعديل الكتاب</h3>
                 <span class="close-edit">&times;</span>
             </div>
             <form id="editBookForm" class="admin-form">
@@ -512,52 +418,7 @@
                     <label>وصف الكتاب</label>
                     <textarea id="editDesc" rows="3"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>رابط الغلاف</label>
-                    <input type="url" id="editCover">
-                </div>
-                <div class="form-group">
-                    <label>رابط PDF</label>
-                    <input type="url" id="editPdfUrl">
-                </div>
-                <div class="form-group">
-                    <label>رابط التحميل</label>
-                    <input type="url" id="editDownloadUrl">
-                </div>
-                <button type="submit" class="btn-primary">حفظ التغييرات</button>
-            </form>
-        </div>
-    </div>
-    
-    <!-- Edit User Modal -->
-    <div id="editUserModal" class="modal">
-        <div class="modal-content small-modal">
-            <div class="modal-header">
-                <h3><i class="fas fa-user-edit"></i> تعديل المستخدم</h3>
-                <span class="close-edit">&times;</span>
-            </div>
-            <form id="editUserForm" class="admin-form">
-                <input type="hidden" id="editUserId">
-                <div class="form-group">
-                    <label>اسم المستخدم</label>
-                    <input type="text" id="editUsername" required>
-                </div>
-                <div class="form-group">
-                    <label>البريد الإلكتروني</label>
-                    <input type="email" id="editEmail" required>
-                </div>
-                <div class="form-group">
-                    <label>الدور</label>
-                    <select id="editRole">
-                        <option value="user">مستخدم عادي</option>
-                        <option value="admin">مشرف</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>نبذة عن المستخدم</label>
-                    <textarea id="editBio" rows="3"></textarea>
-                </div>
-                <button type="submit" class="btn-primary">حفظ التغييرات</button>
+                <button type="submit" class="btn-primary">حفظ</button>
             </form>
         </div>
     </div>
@@ -565,4 +426,4 @@
     <script src="js/api.js"></script>
     <script src="js/admin.js"></script>
 </body>
-</html>
+    </html>
