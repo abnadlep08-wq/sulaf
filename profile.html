@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي - Sulaf PDF</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <i class="fas fa-book-open"></i>
+                    <span>Sulaf</span> PDF
+                </div>
+                <a href="index.html" class="back-home">
+                    <i class="fas fa-arrow-right"></i> العودة للرئيسية
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="profile-container">
+        <div class="profile-header" id="profileHeader">
+            <div class="profile-cover"></div>
+            <div class="profile-info">
+                <div class="profile-avatar">
+                    <img id="profileAvatar" src="" alt="Avatar">
+                    <button class="change-avatar-btn" id="changeAvatarBtn">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+                <div class="profile-details">
+                    <h1 id="profileUsername"></h1>
+                    <p id="profileBio"></p>
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <span id="followersCount">0</span>
+                            <label>متابع</label>
+                        </div>
+                        <div class="stat">
+                            <span id="followingCount">0</span>
+                            <label>يتابع</label>
+                        </div>
+                        <div class="stat">
+                            <span id="booksPublishedCount">0</span>
+                            <label>كتاب منشور</label>
+                        </div>
+                    </div>
+                    <div class="profile-actions" id="profileActions"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-tabs">
+            <button class="profile-tab active" data-tab="books">كتبي</button>
+            <button class="profile-tab" data-tab="reviews">مراجعاتي</button>
+            <button class="profile-tab" data-tab="quotes">اقتباساتي</button>
+            <button class="profile-tab" data-tab="edit" id="editTabBtn" style="display: none;">تعديل الملف</button>
+        </div>
+
+        <div class="profile-content">
+            <div id="booksTab" class="profile-tab-content active">
+                <div class="books-grid" id="userBooksGrid"></div>
+            </div>
+            <div id="reviewsTab" class="profile-tab-content">
+                <div id="userReviewsList"></div>
+            </div>
+            <div id="quotesTab" class="profile-tab-content">
+                <div id="userQuotesList"></div>
+            </div>
+            <div id="editTab" class="profile-tab-content">
+                <form id="editProfileForm" class="edit-profile-form">
+                    <div class="form-group">
+                        <label>اسم المستخدم</label>
+                        <input type="text" id="editUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label>البريد الإلكتروني</label>
+                        <input type="email" id="editEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>نبذة عنك</label>
+                        <textarea id="editBio" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>رابط الصورة الشخصية</label>
+                        <input type="url" id="editAvatar" placeholder="https://...">
+                    </div>
+                    <button type="submit" class="btn-primary">حفظ التغييرات</button>
+                </form>
+                
+                <div class="change-password-section">
+                    <h3>تغيير كلمة المرور</h3>
+                    <form id="changePasswordProfileForm">
+                        <div class="form-group">
+                            <label>كلمة المرور الحالية</label>
+                            <input type="password" id="currentPass" required>
+                        </div>
+                        <div class="form-group">
+                            <label>كلمة المرور الجديدة</label>
+                            <input type="password" id="newPass" required>
+                        </div>
+                        <div class="form-group">
+                            <label>تأكيد كلمة المرور</label>
+                            <input type="password" id="confirmNewPass" required>
+                        </div>
+                        <button type="submit" class="btn-primary">تغيير كلمة المرور</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>
