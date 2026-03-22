@@ -1,0 +1,319 @@
+/* Stats Banner */
+.stats-banner {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    padding: 2rem 0;
+    color: white;
+}
+
+.stats-banner .container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-item i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-item span {
+    font-size: 1.8rem;
+    font-weight: bold;
+    display: block;
+}
+
+.stat-item label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Tabs */
+.tabs-header {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 600;
+    color: var(--gray);
+    transition: all 0.3s;
+    border-radius: 8px;
+}
+
+.tab-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+.tab-btn:hover:not(.active) {
+    background: rgba(107, 78, 113, 0.1);
+}
+
+/* Book Card Enhancements */
+.book-rating {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    background: rgba(0,0,0,0.7);
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: var(--secondary);
+}
+
+.book-stats {
+    font-size: 0.75rem;
+    color: var(--gray);
+    margin: 0.5rem 0;
+}
+
+.book-stats i {
+    margin-left: 0.25rem;
+    margin-right: 0.5rem;
+}
+
+.quote-btn {
+    background: var(--secondary);
+    color: var(--dark);
+    border: none;
+    padding: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.quote-btn:hover {
+    background: #c49a2c;
+}
+
+/* Reading Actions */
+.reading-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.reading-select {
+    padding: 0.5rem;
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    font-family: 'Cairo', sans-serif;
+    background: white;
+}
+
+.progress-section {
+    margin: 1rem 0;
+}
+
+.progress-bar {
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 8px;
+}
+
+.progress-fill {
+    background: var(--primary);
+    height: 100%;
+    transition: width 0.3s;
+}
+
+#pageInput {
+    width: 100%;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.small-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.85rem;
+}
+
+/* Reviews Section */
+.reviews-section {
+    margin-top: 1.5rem;
+    border-top: 1px solid #eee;
+    padding-top: 1rem;
+}
+
+.add-review {
+    margin: 1rem 0;
+}
+
+.stars-input {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+}
+
+.stars-input i {
+    font-size: 1.2rem;
+    color: var(--secondary);
+}
+
+#reviewText {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: 'Cairo', sans-serif;
+    resize: vertical;
+    margin-bottom: 0.5rem;
+}
+
+.review-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.review-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.review-header img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.review-stars {
+    display: inline-flex;
+    gap: 0.1rem;
+    font-size: 0.8rem;
+}
+
+.review-comment {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Auth Forms */
+.auth-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #eee;
+}
+
+.auth-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 600;
+    color: var(--gray);
+    transition: all 0.3s;
+}
+
+.auth-tab.active {
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary);
+    margin-bottom: -2px;
+}
+
+.auth-form {
+    display: none;
+}
+
+.auth-form.active {
+    display: block;
+}
+
+/* Reading Lists Modal */
+.reading-lists-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+    overflow-x: auto;
+}
+
+.list-tab {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    white-space: nowrap;
+}
+
+.list-tab.active {
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary);
+}
+
+/* Empty States */
+.empty-state,
+.empty-list,
+.empty-quotes,
+.no-reviews,
+.no-notifications {
+    text-align: center;
+    padding: 2rem;
+    color: var(--gray);
+}
+
+.empty-state i,
+.empty-list i,
+.empty-quotes i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-banner .container {
+        gap: 1rem;
+    }
+    
+    .stat-item span {
+        font-size: 1.2rem;
+    }
+    
+    .stat-item i {
+        font-size: 1.5rem;
+    }
+    
+    .tabs-header {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 0.5rem;
+    }
+    
+    .user-dropdown {
+        width: 280px;
+        right: -50px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
