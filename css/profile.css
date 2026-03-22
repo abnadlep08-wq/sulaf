@@ -1,3 +1,8 @@
+/* ========================================
+   Sulaf PDF - Profile Page Styles
+   ======================================== */
+
+/* Profile Container */
 .profile-container {
     max-width: 1200px;
     margin: 2rem auto;
@@ -7,13 +12,14 @@
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
 }
 
+/* Profile Header */
 .profile-header {
     position: relative;
 }
 
 .profile-cover {
     height: 200px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, #6B4E71 0%, #4A3A4F 100%);
 }
 
 .profile-info {
@@ -36,13 +42,14 @@
     border: 4px solid white;
     background: white;
     object-fit: cover;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .change-avatar-btn {
     position: absolute;
     bottom: 0;
     right: 0;
-    background: var(--primary);
+    background: #6B4E71;
     color: white;
     border: none;
     width: 32px;
@@ -52,6 +59,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.3s;
+}
+
+.change-avatar-btn:hover {
+    transform: scale(1.1);
+    background: #D4AF37;
 }
 
 .profile-details {
@@ -62,11 +75,11 @@
 .profile-details h1 {
     font-size: 1.8rem;
     margin-bottom: 0.5rem;
-    color: var(--dark);
+    color: #1A120B;
 }
 
 .profile-details p {
-    color: var(--gray);
+    color: #8B7A6B;
     margin-bottom: 1rem;
 }
 
@@ -84,21 +97,22 @@
     font-size: 1.2rem;
     font-weight: bold;
     display: block;
-    color: var(--primary);
+    color: #6B4E71;
 }
 
 .profile-stats .stat label {
     font-size: 0.8rem;
-    color: var(--gray);
+    color: #8B7A6B;
 }
 
 .profile-actions {
     display: flex;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .follow-btn {
-    background: var(--primary);
+    background: #6B4E71;
     color: white;
     border: none;
     padding: 0.5rem 1.5rem;
@@ -106,24 +120,47 @@
     cursor: pointer;
     font-family: 'Cairo', sans-serif;
     font-weight: 600;
+    transition: all 0.3s;
 }
 
-.unfollow-btn {
-    background: var(--danger);
-    color: white;
+.follow-btn:hover {
+    background: #4A3A4F;
+    transform: translateY(-2px);
+}
+
+.follow-btn.unfollow-btn {
+    background: #C62828;
+}
+
+.follow-btn.unfollow-btn:hover {
+    background: #b71c1c;
 }
 
 .message-btn {
-    background: var(--secondary);
-    color: var(--dark);
+    background: #D4AF37;
+    color: #1A120B;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 600;
+    transition: all 0.3s;
 }
 
+.message-btn:hover {
+    background: #B88D2A;
+    transform: translateY(-2px);
+}
+
+/* Profile Tabs */
 .profile-tabs {
     display: flex;
-    border-top: 1px solid #eee;
+    border-top: 1px solid #e9ecef;
     background: #f8f9fa;
     padding: 0 2rem;
     gap: 0.5rem;
+    overflow-x: auto;
 }
 
 .profile-tab {
@@ -133,13 +170,18 @@
     cursor: pointer;
     font-family: 'Cairo', sans-serif;
     font-weight: 600;
-    color: var(--gray);
+    color: #8B7A6B;
     transition: all 0.3s;
     position: relative;
+    white-space: nowrap;
+}
+
+.profile-tab:hover {
+    color: #6B4E71;
 }
 
 .profile-tab.active {
-    color: var(--primary);
+    color: #6B4E71;
 }
 
 .profile-tab.active::after {
@@ -149,9 +191,10 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: var(--primary);
+    background: #6B4E71;
 }
 
+/* Profile Content */
 .profile-content {
     padding: 2rem;
 }
@@ -165,6 +208,7 @@
     animation: fadeIn 0.3s;
 }
 
+/* Edit Profile Form */
 .edit-profile-form,
 .change-password-section {
     max-width: 500px;
@@ -174,44 +218,178 @@
 .change-password-section {
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 1px solid #eee;
+    border-top: 1px solid #e9ecef;
 }
 
 .change-password-section h3 {
     margin-bottom: 1rem;
-    color: var(--primary);
+    color: #6B4E71;
 }
 
+/* User Books Grid */
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.book-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.book-cover {
+    position: relative;
+    padding-top: 140%;
+}
+
+.book-cover img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.book-category {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: #D4AF37;
+    color: #1A120B;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.book-info {
+    padding: 1rem;
+}
+
+.book-info h3 {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+    color: #6B4E71;
+}
+
+.book-author {
+    color: #8B7A6B;
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.book-stats {
+    font-size: 0.7rem;
+    color: #8B7A6B;
+    display: flex;
+    gap: 1rem;
+}
+
+/* Reviews & Quotes */
 .review-item,
 .quote-item {
     padding: 1rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #e9ecef;
     margin-bottom: 1rem;
 }
 
 .review-book,
 .quote-book {
     font-weight: bold;
-    color: var(--primary);
+    color: #6B4E71;
     margin-bottom: 0.5rem;
 }
 
 .review-stars {
     margin-bottom: 0.5rem;
+    color: #D4AF37;
+}
+
+.review-comment {
+    color: #666;
+    line-height: 1.5;
+    margin-top: 0.5rem;
 }
 
 .review-date,
 .quote-date {
     font-size: 0.75rem;
-    color: var(--gray);
+    color: #8B7A6B;
     margin-top: 0.5rem;
 }
 
+.quote-text {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.quote-text i {
+    color: #D4AF37;
+    font-size: 1.2rem;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #8B7A6B;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #6B4E71;
+}
+
+/* Back Home Button */
+.back-home {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+}
+
+.back-home:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateX(-5px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
 @media (max-width: 768px) {
     .profile-info {
         flex-direction: column;
         align-items: center;
         text-align: center;
+        padding: 0 1rem 1.5rem;
     }
     
     .profile-stats {
@@ -223,15 +401,34 @@
     }
     
     .profile-tabs {
-        overflow-x: auto;
         padding: 0 1rem;
-    }
-    
-    .profile-tab {
-        white-space: nowrap;
     }
     
     .profile-content {
         padding: 1rem;
+    }
+    
+    .books-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-avatar img {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .profile-details h1 {
+        font-size: 1.3rem;
+    }
+    
+    .profile-stats {
+        gap: 1rem;
+    }
+    
+    .books-grid {
+        grid-template-columns: 1fr;
     }
 }
