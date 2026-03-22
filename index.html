@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sulaf PDF | مكتبتك الرقمية للروايات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <i class="fas fa-book-open"></i>
+                    <span>Sulaf</span> PDF
+                </div>
+                
+                <div class="search-section">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="ابحث عن رواية، مؤلف، أو تصنيف...">
+                    </div>
+                </div>
+                
+                <div class="nav-actions">
+                    <button id="darkModeBtn" class="icon-btn">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="user-menu" id="userMenu">
+                        <div class="user-icon" id="userIcon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-dropdown" id="userDropdown">
+                            <div id="userInfo"></div>
+                            <div id="notificationsPanel" class="notifications-panel">
+                                <h4><i class="fas fa-bell"></i> الإشعارات</h4>
+                                <div id="notificationsList"></div>
+                            </div>
+                            <hr>
+                            <a href="profile.html" class="dropdown-item">
+                                <i class="fas fa-user-circle"></i> ملفي الشخصي
+                            </a>
+                            <a href="#" id="readingListsLink" class="dropdown-item">
+                                <i class="fas fa-list"></i> قوائم القراءة
+                            </a>
+                            <a href="#" id="quotesLink" class="dropdown-item">
+                                <i class="fas fa-quote-right"></i> اقتباساتي
+                            </a>
+                            <a href="#" id="statsLink" class="dropdown-item">
+                                <i class="fas fa-chart-line"></i> إحصائياتي
+                            </a>
+                            <hr>
+                            <a href="#" id="logoutBtn" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+                            </a>
+                        </div>
+                    </div>
+                    <a href="admin.html" class="admin-link" id="adminLink" style="display: none;">
+                        <i class="fas fa-user-shield"></i>
+                    </a>
+                    <button id="loginBtn" class="btn-login">
+                        <i class="fas fa-sign-in-alt"></i> دخول
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Categories -->
+    <section class="categories">
+        <div class="container">
+            <div class="categories-slider">
+                <button class="category-btn active" data-category="all">
+                    <i class="fas fa-book"></i> الكل
+                </button>
+                <button class="category-btn" data-category="fantasy">
+                    <i class="fas fa-dragon"></i> فانتازيا
+                </button>
+                <button class="category-btn" data-category="romance">
+                    <i class="fas fa-heart"></i> رومانسي
+                </button>
+                <button class="category-btn" data-category="mystery">
+                    <i class="fas fa-search"></i> غموض
+                </button>
+                <button class="category-btn" data-category="science-fiction">
+                    <i class="fas fa-rocket"></i> خيال علمي
+                </button>
+                <button class="category-btn" data-category="horror">
+                    <i class="fas fa-skull"></i> رعب
+                </button>
+                <button class="category-btn" data-category="historical">
+                    <i class="fas fa-landmark"></i> تاريخي
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Banner -->
+    <div class="stats-banner">
+        <div class="container">
+            <div class="stat-item">
+                <i class="fas fa-book"></i>
+                <span id="totalBooks">0</span>
+                <label>كتاب</label>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-users"></i>
+                <span id="totalUsers">0</span>
+                <label>قارئ</label>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-star"></i>
+                <span id="totalReviews">0</span>
+                <label>تقييم</label>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-download"></i>
+                <span id="totalDownloads">0</span>
+                <label>تحميل</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Books Grid -->
+    <main class="main-content">
+        <div class="container">
+            <div class="books-header">
+                <div class="tabs-header">
+                    <button class="tab-btn active" data-tab="all">
+                        <i class="fas fa-fire"></i> أحدث الكتب
+                    </button>
+                    <button class="tab-btn" data-tab="recommended">
+                        <i class="fas fa-star"></i> موصى بها لك
+                    </button>
+                    <button class="tab-btn" data-tab="popular">
+                        <i class="fas fa-chart-line"></i> الأكثر قراءة
+                    </button>
+                    <button class="tab-btn" data-tab="top-rated">
+                        <i class="fas fa-trophy"></i> الأعلى تقييماً
+                    </button>
+                </div>
+                <div class="sort-options">
+                    <select id="sortSelect">
+                        <option value="newest">الأحدث</option>
+                        <option value="title">حسب الاسم</option>
+                        <option value="popular">الأكثر تحميلاً</option>
+                        <option value="rating">الأعلى تقييماً</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="books-grid" id="booksGrid">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>جاري تحميل الكتب...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Book Preview Modal -->
+    <div id="bookModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-body">
+                <div class="book-reader">
+                    <div class="reader-controls">
+                        <button id="darkReaderBtn" class="reader-btn">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <button id="increaseFontBtn" class="reader-btn">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button id="decreaseFontBtn" class="reader-btn">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <button id="saveProgressBtn" class="reader-btn">
+                            <i class="fas fa-bookmark"></i> حفظ التقدم
+                        </button>
+                    </div>
+                    <iframe id="pdfViewer" src="" frameborder="0"></iframe>
+                </div>
+                <div class="book-info-sidebar">
+                    <img id="modalCover" src="" alt="Book Cover">
+                    <h3 id="modalTitle"></h3>
+                    <p id="modalAuthor"></p>
+                    <div class="rating-stars" id="modalRating"></div>
+                    <p id="modalDesc"></p>
+                    
+                    <div class="reading-actions">
+                        <select id="readingListSelect" class="reading-select">
+                            <option value="">أضف إلى قائمة...</option>
+                            <option value="wantToRead">أريد قراءتها</option>
+                            <option value="reading">أقرأها حالياً</option>
+                            <option value="read">انتهيت من قراءتها</option>
+                            <option value="favorites">المفضلة</option>
+                        </select>
+                        <a id="downloadBtn" class="download-btn" download>
+                            <i class="fas fa-download"></i> تحميل PDF
+                        </a>
+                    </div>
+                    
+                    <div class="progress-section" id="progressSection" style="display: none;">
+                        <label>تقدم القراءة</label>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <span id="progressText"></span>
+                        <input type="number" id="pageInput" placeholder="أدخل رقم الصفحة">
+                        <button id="updateProgressBtn" class="small-btn">تحديث</button>
+                    </div>
+                    
+                    <div class="reviews-section">
+                        <h4><i class="fas fa-comments"></i> التقييمات والمراجعات</h4>
+                        <div class="add-review">
+                            <div class="stars-input" id="starsInput">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                            </div>
+                            <textarea id="reviewText" placeholder="اكتب مراجعتك..."></textarea>
+                            <button id="submitReviewBtn" class="small-btn">نشر المراجعة</button>
+                        </div>
+                        <div id="reviewsList" class="reviews-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login/Register Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content small-modal">
+            <span class="close-modal">&times;</span>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-auth="login">تسجيل دخول</button>
+                <button class="auth-tab" data-auth="register">إنشاء حساب</button>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form active">
+                <div class="form-group">
+                    <label>البريد الإلكتروني أو اسم المستخدم</label>
+                    <input type="text" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">دخول</button>
+            </form>
+            
+            <!-- Register Form -->
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label>اسم المستخدم</label>
+                    <input type="text" id="regUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>تأكيد كلمة المرور</label>
+                    <input type="password" id="regConfirmPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>نبذة عنك (اختياري)</label>
+                    <textarea id="regBio" rows="3" placeholder="اكتب نبذة مختصرة عن نفسك..."></textarea>
+                </div>
+                <button type="submit" class="btn-primary">إنشاء حساب</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quotes Modal -->
+    <div id="quotesModal" class="modal">
+        <div class="modal-content small-modal">
+            <div class="modal-header">
+                <h3>اقتباساتي</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div id="quotesList" class="quotes-list"></div>
+        </div>
+    </div>
+
+    <!-- Reading Lists Modal -->
+    <div id="readingListsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>قوائم القراءة</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="reading-lists-tabs">
+                <button class="list-tab active" data-list="wantToRead">سأقرأها لاحقاً</button>
+                <button class="list-tab" data-list="reading">أقرأها حالياً</button>
+                <button class="list-tab" data-list="read">انتهيت من قراءتها</button>
+                <button class="list-tab" data-list="favorites">المفضلة</button>
+            </div>
+            <div id="readingListsContent"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Sulaf PDF | جميع الحقوق محفوظة</p>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
